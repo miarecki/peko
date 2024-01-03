@@ -17,7 +17,7 @@ PEKO is a password-protected encrypted note-taking application built in Python u
 
 ## Screenshots
 
-### 1. Login/Register Page
+### 1. Login/Register Screen
 
 ![Login/Register Page](screenshots/login_register_screen.png)
 
