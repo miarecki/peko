@@ -1,13 +1,13 @@
 import psycopg2
 from argon2 import PasswordHasher
 
-# this needs to be secret - leave for now.
+# put in .env file later; leave for now.
 def db_connect():
 	db_connect.conn = psycopg2.connect(
-		host = 'clqu6b0gqk6s73914ud0-a.frankfurt-postgres.render.com',
+		host = 'REDACTED',
 		database = 'peko_postgresql_instance',
 		user = 'peko_postgresql_instance_user',
-		password = 'xXz1d3dAxeOKPmJEWKv7h02hj3L0MuqM',
+		password = 'REDACTED',
 		port = '5432',
 		)
 
