@@ -9,7 +9,7 @@ PEKO is a password-protected encrypted note-taking application built in Python u
 
 ## Features
 
-- **Password Protection**: Users can secure their accounts with a password.
+- **Password Protection**: Users can secure their accounts with a password. Password are stored as hashes in the database.
 - **Encrypted Storage**: Notes are stored in an encrypted format for heightened privacy.
 - **Multi-Format Support**: PEKO supports text, image, and sound notes for versatile content creation.
 - **Database Integration**: Utilizes PostgreSQL for robust and organized data storage.
@@ -48,7 +48,10 @@ A text editor for code editing and project management.
 ## 3. [PostgreSQL](https://www.postgresql.org/)
 Utilized as the backend database for storing and managing notes.
 
-## 4. GUI Elements
+## 4. [Argon2](https://pypi.org/project/argon2-cffi/)
+Used for password hashing and verifying.
+
+## 5. GUI Elements
 Can be found at https://icons8.com/. Detailed list later.
 
 # License
