@@ -51,7 +51,10 @@ Utilized as the backend database for storing and managing notes.
 ## 4. [Argon2](https://pypi.org/project/argon2-cffi/)
 Used for password hashing and verifying.
 
-## 5. GUI Elements
+## 5. [Crypto.PublicKey](https://pycryptodome.readthedocs.io/en/latest/src/public_key/ecc.html)
+Will be used for encryption (and decryption) later.
+
+## 6. GUI Elements
 Can be found at https://icons8.com/. Detailed list later.
 
 # License
