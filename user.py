@@ -13,4 +13,7 @@ class User:
 	def get_text_notes(self):
 		return db.get_text_notes(self.user_id)
 
+	def get_contacts(self):
+		return db.get_contacts(self.user_id)
+
 

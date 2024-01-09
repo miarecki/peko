@@ -10,8 +10,12 @@ CREATE TABLE Users (
 CREATE TABLE Contacts (
     contact_id SERIAL PRIMARY KEY,
     user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
-    contact_name VARCHAR(255) NOT NULL,
-    contact_email VARCHAR(255) NOT NULL
+    contact_avatar VARCHAR(255) DEFAULT '/gui/avatar_default.png';
+    contact_display_name VARCHAR(255) NOT NULL,
+    contact_first_name VARCHAR(255),
+    contact_last_name VARCHAR(255),
+    contact_phone VARCHAR(255),
+    contact_email VARCHAR(255),
 );
 
 -- Create Settings table

@@ -1,13 +1,13 @@
 import psycopg2
 from argon2 import PasswordHasher
 
-# put in .env file later; leave for now.
+# this needs to be secret - leave for now.
 def db_connect():
 	db_connect.conn = psycopg2.connect(
-		host = 'REDACTED',
+		host = 'clqu6b0gqk6s73914ud0-a.frankfurt-postgres.render.com',
 		database = 'peko_postgresql_instance',
 		user = 'peko_postgresql_instance_user',
-		password = 'REDACTED',
+		password = 'xXz1d3dAxeOKPmJEWKv7h02hj3L0MuqM',
 		port = '5432',
 		)
 
@@ -383,3 +383,161 @@ def get_note_title(nid):
 
 		db_connect.conn.commit()
 		db_connect.conn.close()
+
+
+# ======= new contact add
+
+def insert_contact(uid, display_name, first_name, last_name, email, phone, avatar):
+    db_connect()
+    c = db_connect.conn.cursor()
+
+    try:
+        query = '''
+            INSERT INTO Contacts (
+                user_id,
+                contact_display_name,
+                contact_first_name,
+                contact_last_name,
+                contact_email,
+                contact_phone,
+                contact_avatar
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s, %s
+            );
+        '''
+        c.execute(query, (
+            uid,
+            display_name if display_name != '' else None,
+            first_name if first_name != '' else None,
+            last_name if last_name != '' else None,
+            email if email != '' else None,
+            phone if phone != '' else None,
+            avatar if avatar != '' else '/gui/avatar_default.png'
+        ))
+
+    finally:
+        db_connect.conn.commit()
+        db_connect.conn.close()
+
+#===============
+
+def get_contacts(uid):
+    db_connect()
+    c = db_connect.conn.cursor()
+
+    try:
+        # Check if the view already exists
+        c.execute('''SELECT EXISTS (
+            SELECT 1 FROM information_schema.views 
+            WHERE table_name = 'current_user_contacts'
+        );''')
+
+        view_exists = c.fetchone()[0]
+
+        if not view_exists:
+            # Create the view if it doesn't exist
+            c.execute('''CREATE VIEW current_user_contacts AS 
+                SELECT * FROM Contacts
+                WHERE user_id = %s;
+            ''', (uid,))
+
+        # Fetch the data from the view
+        c.execute('''SELECT * FROM current_user_contacts
+            WHERE user_id = %s;
+        ''', (uid,))
+
+        result = c.fetchall()
+        return result
+
+    finally:
+        db_connect.conn.commit()
+        db_connect.conn.close()
+
+
+# =======
+
+def get_text_note(nid):
+
+	db_connect()
+	c = db_connect.conn.cursor() 
+
+	try:
+		c.execute('''SELECT * FROM Notes
+			WHERE note_id = %s;
+''', (nid,))
+
+		result = c.fetchone()
+		return result
+
+	finally:
+
+		db_connect.conn.commit()
+		db_connect.conn.close()
+
+# =================
+
+def test_select_contacts():
+
+	db_connect()
+	c = db_connect.conn.cursor() 
+
+	try:
+		c.execute('''SELECT * FROM Contacts;''')
+
+		result = c.fetchall()
+		return result
+
+	finally:
+
+		db_connect.conn.commit()
+		db_connect.conn.close()
+
+
+# =======
+
+def get_contact(cid):
+
+	db_connect()
+	c = db_connect.conn.cursor() 
+
+	try:
+		c.execute('''SELECT * FROM current_user_contacts
+			WHERE contact_id = %s;
+''', (cid,))
+
+		result = c.fetchone()
+		return result
+
+	except:
+
+		c.execute('''SELECT * FROM Contacts
+			WHERE contact_id = %s;
+''', (cid,))
+
+		result = c.fetchone()
+		return result
+
+	finally:
+
+		db_connect.conn.commit()
+		db_connect.conn.close()
+
+
+
+# =================
+
+def remove_contact(contact_id):
+    db_connect()
+    c = db_connect.conn.cursor()
+
+    try:
+        query = '''
+            DELETE FROM current_user_contacts
+            WHERE contact_id = %s;
+        '''
+        c.execute(query, (contact_id,))
+    finally:
+        db_connect.conn.commit()
+        db_connect.conn.close()
+
+

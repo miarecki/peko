@@ -1,5 +1,6 @@
 # Import
 import customtkinter
+from tkinter.filedialog import askopenfilename
 import os
 from PIL import Image, ImageTk
 import peko_database
@@ -19,8 +20,9 @@ lgrey = '#323232'
 bluey = '#1a6eb5'
 bluehover = '#317dbc'
 
-global buttons
-buttons = []
+global avatar_file_path
+avatar_file_path = ''
+
 def run_login_page():
 
 	# colors:  left #1f1f1f \  middle  #282828 \ right #323232
@@ -275,6 +277,8 @@ def run_app():
 		switch_frame(reminders_frame)
 		print("test: reminders")
 
+
+
 	def show_all_favorites():
 		# self-explanatory
 		lights_out(favorites_button)
@@ -332,11 +336,13 @@ def run_app():
 
 	def text_note_display(note_id):
 
+		notes = peko_database.get_text_note(note_id)
+
 		switch_screen(text_note_display_screen)
-		text_note_title_label.configure(text = peko_database.get_note_title(note_id))
+		text_note_title_label.configure(text = notes[2])
 		text_note_content_tb.configure(state = 'normal')
 		text_note_content_tb.delete("0.0", "end")
-		text_note_content_tb.insert("0.0", peko_database.get_note_content(note_id))
+		text_note_content_tb.insert("0.0", notes[3])
 		text_note_content_tb.configure(state = 'disabled')
 
 		text_note_title_label.grid(row=0, column=0, padx=10, pady=(0, 20))
@@ -370,6 +376,53 @@ def run_app():
 		update_wawla_text()
 		print("test: contacts")
 
+		contacts_list = []
+
+		contacts = current_user.get_contacts()
+		row = 1
+		buttons = []
+		for elem in contacts:
+
+			path = elem[2]
+
+			if elem[2] == '/gui/avatar_default.png':
+				path = current_path + '/gui/avatar_default.png'
+
+			contact = customtkinter.CTkButton(
+				master = contacts_frame,
+				command = lambda x=elem[0]: contact_display(x),
+				image = customtkinter.CTkImage(Image.open(path), size=(32, 32)),
+				width = 250,
+				height = 50,
+				text = f'{elem[3]}',
+				anchor = 'w',
+				fg_color = '#1f1f1f',
+				bg_color = '#282828',
+				background_corner_colors = ['#282828','#282828','#282828','#282828'],
+				border_color = '#1a6eb5',
+				hover_color = '#323232',
+				border_width = 1
+				)
+			contact.grid(row=row, column=0, padx=10, pady=(0, 20))
+			row += 1
+			buttons.append(contact)
+
+	def contact_display(contact_id):
+
+		contact = peko_database.get_contact(contact_id)
+
+		switch_screen(contact_display_screen)
+		contact_display_name_label.configure(text = contact[3])
+		'''
+		text_note_content_tb.configure(state = 'normal')
+		text_note_content_tb.delete("0.0", "end")
+		text_note_content_tb.insert("0.0", peko_database.get_note_content(note_id))
+		text_note_content_tb.configure(state = 'disabled')
+
+		text_note_title_label.grid(row=0, column=0, padx=10, pady=(0, 20))
+		text_note_content_tb.grid(row=1, column=0, padx=10, pady=(0, 20))
+	'''
+		contact_display_name_label.place(x=20,y=20)
 
 	def show_trash():
 		# self-explanatory
@@ -393,18 +446,14 @@ def run_app():
 		switch_screen(add_content_screen)
 		print('test: add some note.')
 
-
 	def add_new_text_note():
 		switch_screen(add_text_note_screen)
 
-
 	def	add_new_whiteboard_note():
-		print(current_user.get_text_notes())
-
+		pass
 
 	def add_new_recording_note():
 		pass
-
 
 	def new_note_cancel():
 		switch_screen(add_content_screen)
@@ -423,12 +472,10 @@ def run_app():
 		peko_database.insert_text_note(current_user.user_id, title, content, favorite, tag_id)
 		switch_screen(add_content_screen)
 
-
 	def check_if_fav_button():
 		if new_note_favorite_button.cget("image") == favorites_empty_image:
 			return False
 		return True
-
 
 	def new_note_fav():
 		if new_note_favorite_button.cget("image") == favorites_empty_image:
@@ -436,9 +483,38 @@ def run_app():
 		else:
 			new_note_favorite_button.configure(image = favorites_empty_image)
 
-
 	def add_new_contact_clicked():
 		switch_screen(add_contact_screen)
+
+	def add_avatar_to_contact():
+
+		file_path = askopenfilename()
+		if file_path:
+			global avatar_file_path
+			avatar_file_path = file_path
+			avatar = customtkinter.CTkImage(Image.open(avatar_file_path), size=(128, 128))
+			contact_avatar_button.configure(image = avatar)
+
+	def new_contact_cancel():
+		switch_screen(add_content_screen)
+
+	def new_contact_submit():
+		global avatar_file_path
+
+		uid = current_user.user_id
+		display_name = display_name_tb.get().strip()
+		first_name = first_name_tb.get().strip()
+		last_name = last_name_tb.get().strip()
+		email = email_tb.get().strip()
+		phone = phone_tb.get().strip()
+		avatar = avatar_file_path
+
+		peko_database.insert_contact(uid, display_name, first_name, last_name, email, phone, avatar)
+		avatar_file_path = ''
+		switch_screen(add_content_screen)
+		show_all_contacts()
+
+
 
 
 	# Left Panel Image and Buttons - MAIN
@@ -558,7 +634,7 @@ def run_app():
 	text_button.place(x=20, y=250)
 
 	# Whiteboards Button
-	whiteboards_image = customtkinter.CTkImage(Image.open(current_path + "/gui/whiteboards_icon.png"), size=(20, 20))
+	whiteboards_image = customtkinter.CTkImage(Image.open(current_path + '/gui/whiteboards_icon.png'), size=(20, 20))
 	whiteboards_button = customtkinter.CTkButton(
 	master = app,
 	command = show_all_whiteboards,
@@ -1077,27 +1153,197 @@ def run_app():
 	font=('Segoe', 32, 'bold'),
 	text_color = 'white'
 		)
-	create_new_text.place(x=50, y=50)
+	add_a_new_contact_text.place(x=20, y=40)
 
-	# TEXT
+	# Contact Avatar Add Button
+	photo_image = customtkinter.CTkImage(Image.open(current_path + "/gui/camera_icon.png"), size=(32, 32))
+	contact_avatar_button = customtkinter.CTkButton(
+	master = add_contact_screen,
+	command = add_avatar_to_contact,
+	image = photo_image,
+	text = '',
+	width = 128,
+	height = 128,
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey
+		     )
+	contact_avatar_button.place(x=20, y=143)
 
+	# Avatar (text)
+	avatar_text = customtkinter.CTkLabel(
+	master = add_contact_screen,
+	text = 'AVATAR',
+	bg_color = '#323232',
+	font=('Segoe', 10, 'bold'),
+	text_color = 'white'
+		)
+	avatar_text.place(x=68, y=272)
 
-	# display_name_tb
+	# Display Name (text)
+	display_name_text = customtkinter.CTkLabel(
+	master = add_contact_screen,
+	text = 'DISPLAY NAME',
+	bg_color = '#323232',
+	font=('Segoe', 10, 'bold'),
+	text_color = 'white'
+		)
+	display_name_text.place(x=170, y=105)
+
+	# Display Name TextBox
 	display_name_tb = customtkinter.CTkEntry(
 	master = add_contact_screen,
-	width = 300,
+	width = 315,
 	height = 30,
 	fg_color = '#282828',
 	border_color = '#1a6eb5',
 	border_width = 3,
 	placeholder_text = ''
 			)
-	display_name_tb.place(x=95, y=182)
+	display_name_tb.place(x=170, y=130)
+
+	# First Name (text)
+	first_name_text = customtkinter.CTkLabel(
+	master = add_contact_screen,
+	text = 'FIRST NAME',
+	height = 10,
+	bg_color = '#323232',
+	font=('Segoe', 10, 'bold'),
+	text_color = 'white'
+		)
+	first_name_text.place(x=170, y=164)
+
+	# First Name TextBox
+	first_name_tb = customtkinter.CTkEntry(
+	master = add_contact_screen,
+	width = 150,
+	height = 30,
+	fg_color = '#282828',
+	border_color = '#1a6eb5',
+	border_width = 3,
+	placeholder_text = ''
+			)
+	first_name_tb.place(x=170, y=180)
+
+	# Last Name (text)
+	last_name_text = customtkinter.CTkLabel(
+	master = add_contact_screen,
+	text = 'LAST NAME',
+	height = 10,
+	bg_color = '#323232',
+	font=('Segoe', 10, 'bold'),
+	text_color = 'white'
+		)
+	last_name_text.place(x=335, y=164)
+
+	# Last Name TextBox
+	last_name_tb = customtkinter.CTkEntry(
+	master = add_contact_screen,
+	width = 150,
+	height = 30,
+	fg_color = '#282828',
+	border_color = '#1a6eb5',
+	border_width = 3,
+	placeholder_text = ''
+			)
+	last_name_tb.place(x=335, y=180)
+
+	# Email (text)
+	email_text = customtkinter.CTkLabel(
+	master = add_contact_screen,
+	text = 'EMAIL',
+	height = 10,
+	bg_color = '#323232',
+	font=('Segoe', 10, 'bold'),
+	text_color = 'white'
+		)
+	email_text.place(x=170, y=214)
+
+	# Email TextBox
+	email_tb = customtkinter.CTkEntry(
+	master = add_contact_screen,
+	width = 315,
+	height = 30,
+	fg_color = '#282828',
+	border_color = '#1a6eb5',
+	border_width = 3,
+	placeholder_text = ''
+			)
+	email_tb.place(x=170, y=230)
+
+	# Phone # (text)
+	phone_text = customtkinter.CTkLabel(
+	master = add_contact_screen,
+	text = 'PHONE',
+	height = 10,
+	bg_color = '#323232',
+	font=('Segoe', 10, 'bold'),
+	text_color = 'white'
+		)
+	phone_text.place(x=170, y=264)
+
+	# Phone # TextBox
+	phone_tb = customtkinter.CTkEntry(
+	master = add_contact_screen,
+	width = 315,
+	height = 30,
+	fg_color = '#282828',
+	border_color = '#1a6eb5',
+	border_width = 3,
+	placeholder_text = ''
+			)
+	phone_tb.place(x=170, y=280)
+
+	new_contact_cancel_button = customtkinter.CTkButton(
+	master = add_contact_screen,
+	command = new_contact_cancel,
+	text = 'Cancel',
+	font=('Segoe', 16),
+	width = 110,
+	height = 36,
+	fg_color = '#474747',
+	hover_color = '#585858',
+	background_corner_colors = ['#323232', '#323232', '#323232', '#323232'],
+	bg_color = '#323232'
+		     )
+	new_contact_cancel_button.place(x=245, y=330)
+
+	new_contact_submit_button = customtkinter.CTkButton(
+	master = add_contact_screen,
+	command = new_contact_submit,
+	text = 'Submit',
+	font=('Segoe', 16, 'bold'),
+	width = 110,
+	height = 36,
+	fg_color = '#1a6eb5',
+	hover_color = '#317dbc',
+	background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
+	bg_color = '#323232'
+		     )
+	new_contact_submit_button.place(x=375, y=330)
 
 
+# =========	               CONTACT DISPLAY                  ==============
 
+	contact_display_screen = customtkinter.CTkFrame(
+	master = app,
+	width = 480,
+	height = 600,
+	bg_color = '#323232',
+	fg_color = '#323232'
+	)
 
-
+	contact_display_name_label = customtkinter.CTkLabel(
+		master = contact_display_screen,
+		width = 450,
+		height = 100,
+		text = '',
+		font = ('Segoe', 34, 'bold'),
+		text_color = 'white',
+		wraplength=480,
+		justify = 'left'
+		)
 
 
 
@@ -1123,7 +1369,7 @@ def run_app():
 	 only_text_notes_frame]
 
 	# List of ShowScreens
-	screen_list = [add_content_screen, add_text_note_screen, text_note_display_screen, add_contact_screen]
+	screen_list = [add_content_screen, add_text_note_screen, text_note_display_screen, add_contact_screen, contact_display_screen]
 
 	#run app
 	app.mainloop()
