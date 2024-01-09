@@ -11,7 +11,14 @@ from user import User
 #		- recordings
 #		- everything else
 #		- encryption
-  
+
+# colors:
+dgrey = '#1f1f1f'
+grey = '#282828'
+lgrey = '#323232'
+bluey = '#1a6eb5'
+bluehover = '#317dbc'
+
 global buttons
 buttons = []
 def run_login_page():
@@ -237,11 +244,9 @@ def run_app():
 		for frame in frame_list:
 			if frame_name != frame:
 				frame_name.place(x=220, y=100)
+				#frame.place_forget()
+				frame.grid_forget()
 				frame.place_forget()
-				global buttons
-				for i in buttons:
-					i.grid_forget()
-		buttons = []
 
 
 	# showscreen switcher
@@ -302,7 +307,6 @@ def run_app():
 		# Just Text Note Buttons Creation on TEXT
 		text_notes = current_user.get_text_notes()
 		row = 0
-		global buttons
 		buttons = []
 		for elem in text_notes:
 
@@ -431,6 +435,10 @@ def run_app():
 			new_note_favorite_button.configure(image = favorites_filled_image)
 		else:
 			new_note_favorite_button.configure(image = favorites_empty_image)
+
+
+	def add_new_contact_clicked():
+		switch_screen(add_contact_screen)
 
 
 	# Left Panel Image and Buttons - MAIN
@@ -625,6 +633,7 @@ def run_app():
 		     )
 	settings_button.place(x=20, y=530)
 
+	# ==========================================================================================================
 	# Middle Panel Image and Buttons and Frames - MAIN
 
 	# How Do Tabs (Frames) Work?
@@ -689,8 +698,6 @@ def run_app():
 	border_color = '#1a6eb5',
 	border_width = 3,
 	)
-
-
 
 	# Add Button
 	add_button = customtkinter.CTkButton(
@@ -852,6 +859,36 @@ def run_app():
 		     )
 	new_recording_note_button.place(x=361, y=150)
 
+	# Text (text)
+	text_text = customtkinter.CTkLabel(
+	master = add_content_screen,
+	text = 'Text',
+	bg_color = '#323232',
+	font=('Segoe', 16, 'bold'),
+	text_color = 'white'
+		)
+	text_text.place(x=89, y=220)
+
+	# Whiteboard (text)
+	whiteboard_text = customtkinter.CTkLabel(
+	master = add_content_screen,
+	text = 'Whiteboard',
+	bg_color = '#323232',
+	font=('Segoe', 16, 'bold'),
+	text_color = 'white'
+		)
+	whiteboard_text.place(x=206, y=220)
+
+	# Recording (text)
+	recording_text = customtkinter.CTkLabel(
+	master = add_content_screen,
+	text = 'Recording',
+	bg_color = '#323232',
+	font=('Segoe', 16, 'bold'),
+	text_color = 'white'
+		)
+	recording_text.place(x=356, y=220)
+
 # ===============================================================================================
 
 	add_text_note_screen = customtkinter.CTkFrame(
@@ -860,7 +897,7 @@ def run_app():
 		height = 650,
 		bg_color = '#323232',
 		fg_color = '#323232',
-		border_color = '#1a6eb5',
+		#border_color = '#1a6eb5',
 		border_width = 3
 		)
 
@@ -877,7 +914,7 @@ def run_app():
 		height = 30,
 		font = font,
 		border_width = 1,
-		border_color = '#317dbc',
+		#border_color = '#317dbc',
 		fg_color = '#474747'
 
 		)
@@ -913,7 +950,7 @@ def run_app():
 		height = 420,
 		wrap = 'word',
 		font = font,
-		border_color = '#317dbc',
+		#border_color = '#317dbc',
 		border_width = 1,
 		fg_color = '#474747'
 		)
@@ -933,7 +970,7 @@ def run_app():
 		dropdown_font = font,
 		values = ['I', 'am', 'testing', 'stuff'],
 		border_width = 1,
-		border_color = '#317dbc',
+		#border_color = '#317dbc',
 		fg_color = '#474747',
 		button_color = '#1a6eb5',
 		button_hover_color = '#317dbc',
@@ -971,7 +1008,7 @@ def run_app():
 	new_note_submit_button.place(x=365, y=570)
 
 
-	text_note_display_screen = customtkinter.CTkScrollableFrame(
+	text_note_display_screen = customtkinter.CTkFrame(
 	master = app,
 	width = 480,
 	height = 600,
@@ -1002,15 +1039,91 @@ def run_app():
 		wrap = 'word'
 		)
 
+# =======================================================================================
+
+	# CONTACTS
+	
+	add_new_contact_button = customtkinter.CTkButton(
+	master = contacts_frame,
+	command = add_new_contact_clicked,
+	text = '+   Add a new contact',
+	font=('Segoe', 16),
+	width = 260,
+	height = 36,
+	fg_color = lgrey,
+	hover_color = '#474747',
+	background_corner_colors=[grey, grey, grey, grey],
+	bg_color = grey		     )
+	add_new_contact_button.grid(row=0, column=0, padx=10, pady=(0, 20))
+
+	#=====================================================================
+
+	# New contact addition
+
+	# New Contact Add Screen
+	add_contact_screen = customtkinter.CTkFrame(
+	master = app,
+	width = 500,
+	height = 650,
+	bg_color = '#323232',
+	fg_color = '#323232',
+	)
+
+	# Add a New Contact... (text)
+	add_a_new_contact_text = customtkinter.CTkLabel(
+	master = add_contact_screen,
+	text = 'Add a new contact...',
+	bg_color = '#323232',
+	font=('Segoe', 32, 'bold'),
+	text_color = 'white'
+		)
+	create_new_text.place(x=50, y=50)
+
+	# TEXT
+
+
+	# display_name_tb
+	display_name_tb = customtkinter.CTkEntry(
+	master = add_contact_screen,
+	width = 300,
+	height = 30,
+	fg_color = '#282828',
+	border_color = '#1a6eb5',
+	border_width = 3,
+	placeholder_text = ''
+			)
+	display_name_tb.place(x=95, y=182)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	# List of All Buttons
 	button_list = [all_notes_button, reminders_button, favorites_button, statistics_button,
 	text_button, recordings_button, whiteboards_button, contacts_button, trash_button, settings_button]
 
 	# List of All Frames
-	frame_list = [all_notes_frame, reminders_frame, contacts_frame, favorites_frame, statistics_frame]
+	frame_list = [all_notes_frame, reminders_frame, contacts_frame, favorites_frame, statistics_frame,
+	 only_text_notes_frame]
 
 	# List of ShowScreens
-	screen_list = [add_content_screen, add_text_note_screen, text_note_display_screen]
+	screen_list = [add_content_screen, add_text_note_screen, text_note_display_screen, add_contact_screen]
 
 	#run app
 	app.mainloop()
