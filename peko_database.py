@@ -6,7 +6,7 @@ def db_connect():
 	db_connect.conn = psycopg2.connect(
 		host = ':)',
 		database = 'peko_postgresql_instance',
-		user = 'peko_postgresql_instance_user',
+		user = ':)',
 		password = ':)',
 		port = '5432',
 		)
