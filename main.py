@@ -1,4 +1,5 @@
 # Import
+import tkinter
 import customtkinter
 from tkinter.filedialog import askopenfilename
 import os
@@ -458,7 +459,7 @@ def run_app():
 		switch_screen(add_text_note_screen)
 
 	def	add_new_whiteboard_note():
-		pass
+		switch_screen(add_whiteboard_screen)
 
 	def add_new_recording_note():
 		pass
@@ -484,11 +485,22 @@ def run_app():
 			return False
 		return True
 
+	def check_if_fav_button2():
+		if new_whiteboard_favorite_button.cget("image") == favorites_empty_image:
+			return False
+		return True
+
 	def new_note_fav():
 		if new_note_favorite_button.cget("image") == favorites_empty_image:
 			new_note_favorite_button.configure(image = favorites_filled_image)
 		else:
 			new_note_favorite_button.configure(image = favorites_empty_image)
+
+	def new_whiteboard_fav():
+		if new_whiteboard_favorite_button.cget("image") == favorites_empty_image:
+			new_whiteboard_favorite_button.configure(image = favorites_filled_image)
+		else:
+			new_whiteboard_favorite_button.configure(image = favorites_empty_image)
 
 	def add_new_contact_clicked():
 		switch_screen(add_contact_screen)
@@ -504,6 +516,12 @@ def run_app():
 
 	def new_contact_cancel():
 		switch_screen(add_content_screen)
+
+	def cancel_new_whiteboard():
+		switch_screen(add_content_screen)
+
+	def save_new_whiteboard():
+		pass
 
 	def new_contact_submit():
 		global avatar_file_path
@@ -1446,6 +1464,157 @@ def run_app():
 
 
 
+
+
+
+# =============================== WHITEBOARDS =================================
+
+# =============================== CREATE NEW WHITEBOARD =====================================
+
+	add_whiteboard_screen = customtkinter.CTkFrame(
+		master = app,
+		width = 500,
+		height = 650,
+		bg_color = '#323232',
+		fg_color = '#323232',
+		border_width = 3,
+		border_color = bluey
+		)
+
+	global is_drawing
+	global prev_x
+	global prev_y
+	is_drawing = False
+	prev_x, prev_y = 0, 0 
+	drawing_color = "black"
+	line_width = 5
+
+	def start_drawing(event):
+	    global is_drawing, prev_x, prev_y
+	    is_drawing = True
+	    prev_x, prev_y = event.x, event.y
+
+	def draw(event):
+	    global is_drawing, prev_x, prev_y
+	    if is_drawing:
+	        current_x, current_y = event.x, event.y
+	        canvas.create_line(prev_x, prev_y, current_x, current_y, fill=drawing_color, width=line_width, capstyle=tkinter.ROUND, smooth=True)
+	        prev_x, prev_y = current_x, current_y
+
+	def stop_drawing(event):
+	    global is_drawing
+	    is_drawing = False
+
+	canvas = tkinter.Canvas(add_whiteboard_screen, bg="white")
+	canvas.place(x=4, y=74)
+	canvas.config(width=612, height=630)
+
+	canvas.bind("<Button-1>", start_drawing)
+	canvas.bind("<B1-Motion>", draw)
+	canvas.bind("<ButtonRelease-1>", stop_drawing)
+
+	save_whiteboad_button = customtkinter.CTkButton(
+		master = add_whiteboard_screen,
+		command = save_new_whiteboard,
+		text = 'Save',
+		font=('Segoe', 16, 'bold'),
+		width = 110,
+		height = 36,
+		fg_color = '#1a6eb5',
+		hover_color = '#317dbc',
+		background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
+		bg_color = '#323232'
+		     )
+	save_whiteboad_button.place(x=370, y=585)
+
+	cancel_new_whiteboard_button = customtkinter.CTkButton(
+		master = add_whiteboard_screen,
+		command = cancel_new_whiteboard,
+		text = 'Cancel',
+		font=('Segoe', 16),
+		width = 110,
+		height = 36,
+		fg_color = '#474747',
+		hover_color = '#317dbc',
+		background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+		bg_color = lgrey
+		     )
+	cancel_new_whiteboard_button.place(x=230, y=585)
+
+	def clear_canvas():
+		canvas.delete("all")
+
+	clear_canvas_button = customtkinter.CTkButton(
+	master = add_whiteboard_screen,
+	command = clear_canvas,
+	text = 'Clear canvas',
+	font=('Segoe', 16),
+	width = 110,
+	height = 36,
+	fg_color = '#474747',
+	hover_color = '#317dbc',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey
+	     )
+	clear_canvas_button.place(x=20, y=585)
+
+	whiteboard_title_tb = customtkinter.CTkEntry(
+		master = add_whiteboard_screen,
+		placeholder_text = 'Title...',
+		font = ('Segoe', 16, 'bold'),
+		width = 230,
+		height = 50,
+		border_width = 1,
+		bg_color = lgrey,
+		fg_color = lgrey
+		)
+	whiteboard_title_tb.place(x=5, y=5)
+
+	new_whiteboard_tag_combobox = customtkinter.CTkComboBox(
+		master = add_whiteboard_screen,
+		width = 160,
+		font = font,
+		dropdown_font = font,
+		values = [''],
+		border_width = 1,
+		fg_color = '#474747',
+		button_color = '#1a6eb5',
+		button_hover_color = '#317dbc',
+		dropdown_fg_color = '#474747',
+		dropdown_hover_color = '#317dbc',
+		)
+	new_whiteboard_tag_combobox.place(x=250, y=20)
+
+	new_whiteboard_favorite_button = customtkinter.CTkButton(
+		master = add_whiteboard_screen,
+		width = 32,
+		height = 32,
+		command = new_whiteboard_fav,
+		text = "",
+		image = favorites_empty_image,
+		fg_color = lgrey,
+		bg_color = lgrey,
+		background_corner_colors = [lgrey, lgrey, lgrey, lgrey],
+		hover_color = lgrey
+		)
+	new_whiteboard_favorite_button.place(x=430, y=12)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	# List of All Buttons
 	button_list = [all_notes_button, reminders_button, favorites_button, statistics_button,
 	text_button, recordings_button, whiteboards_button, contacts_button, trash_button, settings_button]
@@ -1456,7 +1625,7 @@ def run_app():
 
 	# List of ShowScreens
 	screen_list = [add_content_screen, add_text_note_screen, text_note_display_screen, add_contact_screen,
-	contact_display_screen]
+	contact_display_screen, add_whiteboard_screen]
 
 	#run app
 	app.mainloop()
