@@ -522,8 +522,6 @@ def get_contact(cid):
 		db_connect.conn.commit()
 		db_connect.conn.close()
 
-
-
 # =================
 
 def remove_contact(contact_id):
@@ -539,5 +537,31 @@ def remove_contact(contact_id):
     finally:
         db_connect.conn.commit()
         db_connect.conn.close()
+# =================
 
+def insert_whiteboard(uid, title, content, favorite, tag_id):
+    db_connect()
+    c = db_connect.conn.cursor()
+
+    try:
+        query = '''
+            INSERT INTO WhiteboardNotes (
+                user_id,
+                title,
+                content,
+                favorite,
+                tag_id
+            ) VALUES (
+                %s, %s, %s, %s, %s
+            );
+        '''
+        c.execute(query, (
+            uid, title, content, favorite, tag_id
+        ))
+
+    finally:
+        db_connect.conn.commit()
+        db_connect.conn.close()
+
+# =========================
 
