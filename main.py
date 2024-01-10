@@ -23,6 +23,8 @@ bluehover = '#317dbc'
 global avatar_file_path
 avatar_file_path = ''
 
+
+
 def run_login_page():
 
 	# colors:  left #1f1f1f \  middle  #282828 \ right #323232
@@ -211,6 +213,7 @@ def run_app():
 
 	# System Settings
 	current_path = os.path.dirname(os.path.realpath(__file__))
+	default_avatar_display_image = customtkinter.CTkImage(Image.open(current_path + '/gui/avatar_default.png'), size=(128, 128)) 
 	font = ('Segoe', 15)
 
 	# App Frame
@@ -276,8 +279,6 @@ def run_app():
 		update_wawla_text()
 		switch_frame(reminders_frame)
 		print("test: reminders")
-
-
 
 	def show_all_favorites():
 		# self-explanatory
@@ -385,7 +386,7 @@ def run_app():
 
 			path = elem[2]
 
-			if elem[2] == '/gui/avatar_default.png':
+			if path == '/gui/avatar_default.png':
 				path = current_path + '/gui/avatar_default.png'
 
 			contact = customtkinter.CTkButton(
@@ -395,13 +396,13 @@ def run_app():
 				width = 250,
 				height = 50,
 				text = f'{elem[3]}',
+				font=('Segoe', 15, 'bold'),
 				anchor = 'w',
 				fg_color = '#1f1f1f',
 				bg_color = '#282828',
 				background_corner_colors = ['#282828','#282828','#282828','#282828'],
 				border_color = '#1a6eb5',
 				hover_color = '#323232',
-				border_width = 1
 				)
 			contact.grid(row=row, column=0, padx=10, pady=(0, 20))
 			row += 1
@@ -410,19 +411,26 @@ def run_app():
 	def contact_display(contact_id):
 
 		contact = peko_database.get_contact(contact_id)
+		contact = [x if x != None else '-' for x in contact]
+		path = contact[2]
+
+		if path == '/gui/avatar_default.png':
+			path = current_path + '/gui/avatar_default.png'
+		
+		avatar = customtkinter.CTkImage(Image.open(path), size=(128, 128))
 
 		switch_screen(contact_display_screen)
 		contact_display_name_label.configure(text = contact[3])
-		'''
-		text_note_content_tb.configure(state = 'normal')
-		text_note_content_tb.delete("0.0", "end")
-		text_note_content_tb.insert("0.0", peko_database.get_note_content(note_id))
-		text_note_content_tb.configure(state = 'disabled')
+		contact_display_avatar_button.configure(image = avatar)
 
-		text_note_title_label.grid(row=0, column=0, padx=10, pady=(0, 20))
-		text_note_content_tb.grid(row=1, column=0, padx=10, pady=(0, 20))
-	'''
-		contact_display_name_label.place(x=20,y=20)
+		contact_display_first_name.configure(text = contact[-4])
+		contact_display_last_name.configure(text = contact[-3])
+		contact_display_email.configure(text = contact[-1])
+		contact_display_phone.configure(text = contact[-2])
+
+		contact_display_name_label.place(x=30,y=50)
+		contact_display_avatar_button.place(x=20,y=120)
+
 
 	def show_trash():
 		# self-explanatory
@@ -457,7 +465,6 @@ def run_app():
 
 	def new_note_cancel():
 		switch_screen(add_content_screen)
-
 
 	def new_note_submit():
 		title = new_note_title_tb.get().strip()
@@ -1336,27 +1343,106 @@ def run_app():
 
 	contact_display_name_label = customtkinter.CTkLabel(
 		master = contact_display_screen,
-		width = 450,
-		height = 100,
 		text = '',
 		font = ('Segoe', 34, 'bold'),
-		text_color = 'white',
-		wraplength=480,
-		justify = 'left'
+		text_color = 'white'
+	)
+	
+	contact_display_avatar_button = customtkinter.CTkButton(
+	master = contact_display_screen,
+	image = default_avatar_display_image,
+	text = '',
+	width = 128,
+	height = 128,
+	hover_color = lgrey,
+	fg_color = lgrey,
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey
+	)
+
+	# First Name (text)
+	contact_display_first_name_dec = customtkinter.CTkLabel(
+	master = contact_display_screen,
+	text = 'FIRST NAME',
+	height = 10,
+	bg_color = '#323232',
+	font=('Segoe', 10, 'bold'),
+	text_color = '#9b9b9b'
 		)
+	contact_display_first_name_dec.place(x=170, y=120)
 
+	# First Name TextBox
+	contact_display_first_name = customtkinter.CTkLabel(
+	master = contact_display_screen,
+	bg_color = '#323232',
+	font=('Segoe', 16, 'bold'),
+	text_color = 'white',
+	text = ':)'
+			)
+	contact_display_first_name.place(x=170, y=136)
 
+	# Last Name (text)
+	contact_display_last_name_dec = customtkinter.CTkLabel(
+	master = contact_display_screen,
+	text = 'LAST NAME',
+	height = 10,
+	bg_color = '#323232',
+	font=('Segoe', 10, 'bold'),
+	text_color = '#9b9b9b'
+		)
+	contact_display_last_name_dec.place(x=335, y=120)
 
+	# Last Name TextBox
+	contact_display_last_name = customtkinter.CTkLabel(
+	master = contact_display_screen,
+	bg_color = '#323232',
+	font=('Segoe', 16, 'bold'),
+	text_color = 'white',
+	text = ':)'
+			)
+	contact_display_last_name.place(x=335, y=136)
 
+	# Email (text)
+	contact_display_email_dec = customtkinter.CTkLabel(
+	master = contact_display_screen,
+	text = 'EMAIL',
+	height = 10,
+	bg_color = '#323232',
+	font=('Segoe', 10, 'bold'),
+	text_color = '#9b9b9b'
+		)
+	contact_display_email_dec.place(x=170, y=170)
 
+	# Email TextBox
+	contact_display_email = customtkinter.CTkLabel(
+	master = contact_display_screen,
+	bg_color = '#323232',
+	font=('Segoe', 16, 'bold'),
+	text_color = 'white',
+	text = ':)'
+			)
+	contact_display_email.place(x=170, y=186)
 
+	# Phone # (text)
+	contact_display_phone_dec = customtkinter.CTkLabel(
+	master = contact_display_screen,
+	text = 'PHONE',
+	height = 10,
+	bg_color = '#323232',
+	font=('Segoe', 10, 'bold'),
+	text_color = '#9b9b9b'
+		)
+	contact_display_phone_dec.place(x=170, y=220)
 
-
-
-
-
-
-
+	# Phone # TextBox
+	contact_display_phone = customtkinter.CTkLabel(
+	master = contact_display_screen,
+	bg_color = '#323232',
+	font=('Segoe', 16, 'bold'),
+	text_color = 'white',
+	text = ':)'
+			)
+	contact_display_phone.place(x=170, y=236)
 
 
 
@@ -1366,10 +1452,11 @@ def run_app():
 
 	# List of All Frames
 	frame_list = [all_notes_frame, reminders_frame, contacts_frame, favorites_frame, statistics_frame,
-	 only_text_notes_frame]
+	only_text_notes_frame]
 
 	# List of ShowScreens
-	screen_list = [add_content_screen, add_text_note_screen, text_note_display_screen, add_contact_screen, contact_display_screen]
+	screen_list = [add_content_screen, add_text_note_screen, text_note_display_screen, add_contact_screen,
+	contact_display_screen]
 
 	#run app
 	app.mainloop()
