@@ -1,5 +1,6 @@
 # Import
 import tkinter
+import tkcalendar
 import customtkinter
 from tkinter.filedialog import askopenfilename
 import os
@@ -214,7 +215,8 @@ def run_app():
 
 	# System Settings
 	current_path = os.path.dirname(os.path.realpath(__file__))
-	default_avatar_display_image = customtkinter.CTkImage(Image.open(current_path + '/gui/avatar_default.png'), size=(128, 128)) 
+	default_avatar_display_image = customtkinter.CTkImage(Image.open(current_path + '/gui/avatar_default.png'), size=(128, 128))
+	default_user_avatar =  customtkinter.CTkImage(Image.open(current_path + '/gui/avatars/test_user_avatar.jpg'), size=(64, 64))
 	font = ('Segoe', 15)
 
 	# App Frame
@@ -376,7 +378,6 @@ def run_app():
 		set_wawla('Contacts')
 		switch_frame(contacts_frame)
 		update_wawla_text()
-		print("test: contacts")
 
 		contacts_list = []
 
@@ -433,13 +434,13 @@ def run_app():
 		contact_display_avatar_button.place(x=20,y=120)
 
 
-	def show_trash():
+	def show_history():
 		# self-explanatory
-		lights_out(trash_button)
-		trash_button.configure(fg_color="#1a6eb5", hover_color = '#317dbc')
-		set_wawla('Trash')
+		lights_out(history_button)
+		history_button.configure(fg_color="#1a6eb5", hover_color = '#317dbc')
+		set_wawla('History')
+		switch_frame(history_frame)
 		update_wawla_text()
-		print("test: trash")
 
 
 	def show_settings():
@@ -447,8 +448,8 @@ def run_app():
 		lights_out(settings_button)
 		settings_button.configure(fg_color="#1a6eb5", hover_color = '#317dbc')
 		set_wawla('Settings')
+		switch_frame(settings_frame)
 		update_wawla_text()
-		print("test: settings")
 
 
 	def show_add_content_screen():
@@ -490,6 +491,11 @@ def run_app():
 			return False
 		return True
 
+	def check_if_fav_button3():
+		if new_reminder_favorite_button.cget("image") == favorites_empty_image:
+			return False
+		return True
+
 	def new_note_fav():
 		if new_note_favorite_button.cget("image") == favorites_empty_image:
 			new_note_favorite_button.configure(image = favorites_filled_image)
@@ -501,6 +507,12 @@ def run_app():
 			new_whiteboard_favorite_button.configure(image = favorites_filled_image)
 		else:
 			new_whiteboard_favorite_button.configure(image = favorites_empty_image)
+
+	def new_reminder_fav():
+		if new_reminder_favorite_button.cget("image") == favorites_empty_image:
+			new_reminder_favorite_button.configure(image = favorites_filled_image)
+		else:
+			new_reminder_favorite_button.configure(image = favorites_empty_image)
 
 	def add_new_contact_clicked():
 		switch_screen(add_contact_screen)
@@ -539,6 +551,49 @@ def run_app():
 		switch_screen(add_content_screen)
 		show_all_contacts()
 
+	def add_new_reminder_clicked():
+		switch_screen(add_reminder_screen)
+
+	def new_reminder_submit():
+		pass
+
+	def new_reminder_cancel():
+		pass
+
+	def show_all_personal():
+		# self-explanatory
+		lights_out(personal_button)
+		personal_button.configure(fg_color="#1a6eb5", hover_color = '#317dbc')
+		set_wawla('Personal')
+		switch_frame(only_personal_frame)
+		update_wawla_text()
+
+	def show_all_work():
+		# self-explanatory
+		lights_out(work_button)
+		work_button.configure(fg_color="#1a6eb5", hover_color = '#317dbc')
+		set_wawla('Work')
+		switch_frame(only_work_frame)
+		update_wawla_text()
+
+	def show_all_school():
+		# self-explanatory
+		lights_out(school_button)
+		school_button.configure(fg_color="#1a6eb5", hover_color = '#317dbc')
+		set_wawla('School')
+		switch_frame(only_school_frame)
+		update_wawla_text()
+
+	def show_all_other():
+		# self-explanatory
+		lights_out(other_button)
+		other_button.configure(fg_color="#1a6eb5", hover_color = '#317dbc')
+		set_wawla('Other')
+		switch_frame(only_other_frame)
+		update_wawla_text()
+
+	def show_search():
+		pass
 
 
 
@@ -696,13 +751,13 @@ def run_app():
 		     )
 	recordings_button.place(x=20, y=310)
 
-	# Trash Button
-	trash_image = customtkinter.CTkImage(Image.open(current_path + "/gui/trash_icon.png"), size=(20, 20))
-	trash_button = customtkinter.CTkButton(
+	# Personal Button
+	personal_image = customtkinter.CTkImage(Image.open(current_path + "/gui/personal_icon.png"), size=(20, 20))
+	personal_button = customtkinter.CTkButton(
 	master = app,
-	command = show_trash,
-	image = trash_image,
-	text = 'Trash',
+	command = show_all_personal,
+	image = personal_image,
+	text = 'Personal',
 	width = 160,
 	height = 30,
 	compound = 'left',
@@ -713,7 +768,88 @@ def run_app():
 	bg_color = '#1f1f1f',
 	font = font
 		     )
-	trash_button.place(x=20, y=500)
+	personal_button.place(x=20, y=390)
+
+	# Work Button
+	work_image = customtkinter.CTkImage(Image.open(current_path + "/gui/work_icon.png"), size=(20, 20))
+	work_button = customtkinter.CTkButton(
+	master = app,
+	command = show_all_work,
+	image = work_image,
+	text = 'Work',
+	width = 160,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = '#1f1f1f',
+	hover_color = '#282828',
+	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
+	bg_color = '#1f1f1f',
+	font = font
+		     )
+	work_button.place(x=20, y=420)
+
+	# School Button
+	school_image = customtkinter.CTkImage(Image.open(current_path + "/gui/school_icon.png"), size=(20, 20))
+	school_button = customtkinter.CTkButton(
+	master = app,
+	command = show_all_school,
+	image = school_image,
+	text = 'School',
+	width = 160,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = '#1f1f1f',
+	hover_color = '#282828',
+	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
+	bg_color = '#1f1f1f',
+	font = font
+		     )
+	school_button.place(x=20, y=450)
+
+	# Other Button
+	other_image = customtkinter.CTkImage(Image.open(current_path + "/gui/other_icon.png"), size=(20, 20))
+	other_button = customtkinter.CTkButton(
+	master = app,
+	command = show_all_other,
+	image = other_image,
+	text = 'Other',
+	width = 160,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = '#1f1f1f',
+	hover_color = '#282828',
+	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
+	bg_color = '#1f1f1f',
+	font = font
+		     )
+	other_button.place(x=20, y=480)
+
+
+
+
+
+
+	# Hisory Button
+	history_image = customtkinter.CTkImage(Image.open(current_path + "/gui/history_icon.png"), size=(20, 20))
+	history_button = customtkinter.CTkButton(
+	master = app,
+	command = show_history,
+	image = history_image,
+	text = 'History',
+	width = 160,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = '#1f1f1f',
+	hover_color = '#282828',
+	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
+	bg_color = '#1f1f1f',
+	font = font
+		     )
+	history_button.place(x=20, y=560)
 
 	# Settings Button
 	settings_image = customtkinter.CTkImage(Image.open(current_path + "/gui/settings_icon.png"), size=(20, 20))
@@ -732,7 +868,21 @@ def run_app():
 	bg_color = '#1f1f1f',
 	font = font
 		     )
-	settings_button.place(x=20, y=530)
+	settings_button.place(x=20, y=590)
+
+	# User Avatar Button
+	user_avatar_button = customtkinter.CTkButton(
+	master = app,
+	image = default_user_avatar,
+	text = '',
+	width = 64,
+	height = 64,
+	fg_color = '#1f1f1f',
+	hover_color = '#1f1f1f',
+	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
+	bg_color = '#1f1f1f'
+		     )
+	user_avatar_button.place(x=10, y=630) # 640
 
 	# ==========================================================================================================
 	# Middle Panel Image and Buttons and Frames - MAIN
@@ -800,6 +950,90 @@ def run_app():
 	border_width = 3,
 	)
 
+	only_whiteboards_frame = customtkinter.CTkScrollableFrame(
+	master = app,
+	width = 281,
+	height = 583,
+	bg_color = '#282828',
+	fg_color = '#282828',
+	border_color = '#1a6eb5',
+	border_width = 3,
+	)
+
+	only_recordings_frame = customtkinter.CTkScrollableFrame(
+	master = app,
+	width = 281,
+	height = 583,
+	bg_color = '#282828',
+	fg_color = '#282828',
+	border_color = '#1a6eb5',
+	border_width = 3,
+	)
+
+	only_personal_frame = customtkinter.CTkScrollableFrame(
+	master = app,
+	width = 281,
+	height = 583,
+	bg_color = '#282828',
+	fg_color = '#282828',
+	border_color = '#1a6eb5',
+	border_width = 3,
+	)
+
+	only_work_frame = customtkinter.CTkScrollableFrame(
+	master = app,
+	width = 281,
+	height = 583,
+	bg_color = '#282828',
+	fg_color = '#282828',
+	border_color = '#1a6eb5',
+	border_width = 3,
+	)
+
+	only_school_frame = customtkinter.CTkScrollableFrame(
+	master = app,
+	width = 281,
+	height = 583,
+	bg_color = '#282828',
+	fg_color = '#282828',
+	border_color = '#1a6eb5',
+	border_width = 3,
+	)
+
+	only_other_frame = customtkinter.CTkScrollableFrame(
+	master = app,
+	width = 281,
+	height = 583,
+	bg_color = '#282828',
+	fg_color = '#282828',
+	border_color = '#1a6eb5',
+	border_width = 3,
+	)
+
+	history_frame = customtkinter.CTkScrollableFrame(
+	master = app,
+	width = 281,
+	height = 583,
+	bg_color = '#282828',
+	fg_color = '#282828',
+	border_color = '#1a6eb5',
+	border_width = 3,
+	)
+
+	settings_frame = customtkinter.CTkScrollableFrame(
+	master = app,
+	width = 281,
+	height = 583,
+	bg_color = '#282828',
+	fg_color = '#282828',
+	border_color = '#1a6eb5',
+	border_width = 3,
+	)
+
+
+# =============================================
+
+
 	# Add Button
 	add_button = customtkinter.CTkButton(
 	master = app,
@@ -814,6 +1048,25 @@ def run_app():
 	bg_color = '#282828'
 		     )
 	add_button.place(x=490, y=10)
+
+	# Search Button
+	search_image = customtkinter.CTkImage(Image.open(current_path + "/gui/search_icon.png"), size=(20, 20))
+	search_button = customtkinter.CTkButton(
+	master = app,
+	command = show_search,
+	image = search_image,
+	text = 'Search...                                ',
+	font=('Segoe', 16),
+	compound = 'right',
+	anchor = 'w',
+	width = 250,
+	height = 36,
+	fg_color = lgrey,
+	hover_color = '#474747',
+	background_corner_colors=['#282828', '#282828', '#282828', '#282828'],
+	bg_color = '#282828'
+		     )
+	search_button.place(x=220, y=10)
 
 	# Text Elements - Left Panel
 
@@ -847,6 +1100,16 @@ def run_app():
 		)
 	tags_text.place(x=28, y=360)
 
+	# Account Text
+	account_text = customtkinter.CTkLabel(
+	master = app,
+	text = 'Account',
+	bg_color = '#1f1f1f',
+	font=('Segoe', 13, 'bold'),
+	text_color = '#999999'
+		)
+	account_text.place(x=28, y=530)
+
 	# Welcome, Text
 	welcome_text = customtkinter.CTkLabel(
 	master = app,
@@ -855,7 +1118,7 @@ def run_app():
 	font=('Segoe', 13, 'bold'),
 	text_color = '#999999'
 		)
-	welcome_text.place(x=28, y=640)
+	welcome_text.place(x=95, y=635) # 28
 
 	# Username Text
 	username_text = customtkinter.CTkLabel(
@@ -865,7 +1128,7 @@ def run_app():
 	font=('Segoe', 15, 'bold'),
 	text_color = 'White'
 		)
-	username_text.place(x=28, y=660)
+	username_text.place(x=95, y=655) # 28
 
 	# Text Elements - Middle Panel
 
@@ -1463,13 +1726,9 @@ def run_app():
 	contact_display_phone.place(x=170, y=236)
 
 
-
-
-
-
 # =============================== WHITEBOARDS =================================
 
-# =============================== CREATE NEW WHITEBOARD =====================================
+# ========================= CREATE NEW WHITEBOARD =============================
 
 	add_whiteboard_screen = customtkinter.CTkFrame(
 		master = app,
@@ -1608,6 +1867,143 @@ def run_app():
 
 
 
+# ==================================== REMINDERS ==========================================
+
+	add_reminder_screen = customtkinter.CTkFrame(
+		master = app,
+		width = 500,
+		height = 650,
+		bg_color = '#323232',
+		fg_color = '#323232',
+		border_width = 3,
+		border_color = bluey
+		)
+
+	add_new_reminder_button = customtkinter.CTkButton(
+		master = reminders_frame,
+		command = add_new_reminder_clicked,
+		text = '+   Add a new reminder',
+		font=('Segoe', 16),
+		width = 260,
+		height = 36,
+		fg_color = lgrey,
+		hover_color = '#474747',
+		background_corner_colors=[grey, grey, grey, grey],
+		bg_color = grey
+		)
+	add_new_reminder_button.grid(row=0, column=0, padx=10, pady=(0, 20))
+
+# ====================== Create screen =================================
+
+	new_reminder_title_text = customtkinter.CTkLabel(
+		master = add_reminder_screen,
+		text = 'Title:',
+		font = ('Segoe', 24, 'bold')
+		)
+	new_reminder_title_text.place(x=25, y=25)
+
+	new_reminder_title_tb = customtkinter.CTkEntry(
+		master = add_reminder_screen,
+		width = 400,
+		height = 30,
+		font = font,
+		border_width = 1,
+		#border_color = '#317dbc',
+		fg_color = '#474747'
+		)
+	new_reminder_title_tb.place(x=25, y=60)
+
+	new_reminder_favorite_button = customtkinter.CTkButton(
+		master = add_reminder_screen,
+		width = 32,
+		height = 32,
+		command = new_reminder_fav,
+		text = "",
+		image = favorites_empty_image,
+		fg_color = '#323232',
+		bg_color = '#323232',
+		background_corner_colors = ['#323232', '#323232', '#323232', '#323232'],
+		hover_color = '#323232'
+		)
+	new_reminder_favorite_button.place(x=437, y=54)
+
+	new_reminder_content_text = customtkinter.CTkLabel(
+		master = add_reminder_screen,
+		text = 'Description:',
+		font = ('Segoe', 16, 'bold')
+		)
+	new_reminder_content_text.place(x=25, y=90)
+
+	new_reminder_content_tb = customtkinter.CTkTextbox(
+		master = add_reminder_screen,
+		width = 450,
+		height = 200,
+		wrap = 'word',
+		font = font,
+		#border_color = '#317dbc',
+		border_width = 1,
+		fg_color = '#474747'
+		)
+	new_reminder_content_tb.place(x=25, y=120)
+
+	new_reminder_date_text = customtkinter.CTkLabel(
+		master = add_reminder_screen,
+		text = 'Due date:',
+		font = ('Segoe', 16, 'bold')
+		)
+	new_reminder_date_text.place(x=25, y=325)
+
+	cal = tkcalendar.DateEntry(add_reminder_screen, width=12, background='#1a6eb5', foreground='#323232',
+		borderwidth=2, year=2024, state='readonly')
+	cal.place(x=32,y=436)
+
+	dt = cal.get_date()
+	str_dt = dt.strftime("%Y-%m-%d")
+
+	new_reminder_cancel_button = customtkinter.CTkButton(
+		master = add_reminder_screen,
+		command = new_reminder_cancel,
+		text = 'Cancel',
+		font=('Segoe', 16),
+		width = 110,
+		height = 36,
+		fg_color = '#474747',
+		hover_color = '#317dbc',
+		background_corner_colors = ['#323232', '#323232', '#323232', '#323232'],
+		bg_color = '#323232'
+		)
+	new_reminder_cancel_button.place(x=240, y=335)
+
+	new_reminder_submit_button = customtkinter.CTkButton(
+		master = add_reminder_screen,
+		command = new_reminder_submit,
+		text = 'Submit',
+		font=('Segoe', 16, 'bold'),
+		width = 110,
+		height = 36,
+		fg_color = '#1a6eb5',
+		hover_color = '#317dbc',
+		background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
+		bg_color = '#323232'
+		)
+	new_reminder_submit_button.place(x=365, y=335)
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1617,15 +2013,17 @@ def run_app():
 
 	# List of All Buttons
 	button_list = [all_notes_button, reminders_button, favorites_button, statistics_button,
-	text_button, recordings_button, whiteboards_button, contacts_button, trash_button, settings_button]
+	text_button, recordings_button, whiteboards_button, contacts_button, history_button, settings_button,
+	personal_button, work_button, school_button, other_button]
 
 	# List of All Frames
 	frame_list = [all_notes_frame, reminders_frame, contacts_frame, favorites_frame, statistics_frame,
-	only_text_notes_frame]
+	only_text_notes_frame, history_frame, settings_frame, only_work_frame, only_personal_frame, only_recordings_frame,
+	only_whiteboards_frame, only_school_frame, only_other_frame]
 
 	# List of ShowScreens
 	screen_list = [add_content_screen, add_text_note_screen, text_note_display_screen, add_contact_screen,
-	contact_display_screen, add_whiteboard_screen]
+	contact_display_screen, add_whiteboard_screen, add_reminder_screen]
 
 	#run app
 	app.mainloop()
