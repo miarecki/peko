@@ -33,9 +33,9 @@ PEKO is a password-protected encrypted note-taking application built in Python u
 
 ### Entity-Relationship Diagram (ERD)
 
-![Database Diagram](peko_db.png)
+![Database Diagram](peko_database.png)
 
-*Caption: Entity-Relationship Diagram illustrating the structure of the PostgreSQL database used by PEKO (see also: peko_db.pdf).*
+*Caption: Entity-Relationship Diagram illustrating the structure of the PostgreSQL database used by PEKO (see also: peko_database.pdf).*
 
 # Resources Used
 
