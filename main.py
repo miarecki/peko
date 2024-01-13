@@ -2,9 +2,9 @@
 import tkinter
 import tkcalendar
 import customtkinter
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 import os
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw, ImageGrab
 import peko_database
 import encryption_mech
 from user import User
@@ -66,7 +66,7 @@ def run_login_page():
 		valid = encryption_mech.create_new_account(acc_name_cred, new_real_pass, new_real_pass_confirm)
 		if valid == 'Success!':
 			valid
-			user_id = peko_database.get_uid(login_cred)
+			user_id = peko_database.get_uid(acc_name_cred)
 			global current_user
 			current_user = User(user_id)
 			login_page.destroy() # kinda works
@@ -256,7 +256,6 @@ def run_app():
 				frame.grid_forget()
 				frame.place_forget()
 
-
 	# showscreen switcher
 	def switch_screen(screen_name):
 		for screen in screen_list:
@@ -316,6 +315,7 @@ def run_app():
 		text_notes = current_user.get_text_notes()
 		row = 0
 		buttons = []
+		newline = '\n'
 		for elem in text_notes:
 
 			text_note = customtkinter.CTkButton(
@@ -324,7 +324,7 @@ def run_app():
 				image = text_image,
 				width = 250,
 				height = 50,
-				text = f'{elem[0]}: {elem[2]}',
+				text = f"{elem[2]} {newline} {elem[5].strftime('%Y-%m-%d %H:%M')}",
 				anchor = 'w',
 				fg_color = '#1f1f1f',
 				bg_color = '#282828',
@@ -333,10 +333,9 @@ def run_app():
 				hover_color = '#323232',
 				border_width = 1,
 				)
-			text_note.grid(row=row, column=0, padx=10, pady=(0, 20))
+			text_note.grid(row=row, column=0, padx=10, pady=(10, 10))
 			row += 1
 			buttons.append(text_note)
-
 
 	def text_note_display(note_id):
 
@@ -352,24 +351,74 @@ def run_app():
 		text_note_title_label.grid(row=0, column=0, padx=10, pady=(0, 20))
 		text_note_content_tb.grid(row=1, column=0, padx=10, pady=(0, 20))
 		
-
 	def show_all_whiteboards():
 		# self-explanatory
 		lights_out(whiteboards_button)
 		whiteboards_button.configure(fg_color="#1a6eb5", hover_color = '#317dbc')
 		set_wawla('Whiteboards')
+		switch_frame(only_whiteboards_frame)
 		update_wawla_text()
 		print("test: whiteboards")
 
+		whiteboards_list = []
+
+		# Just Text Note Buttons Creation on TEXT
+		whiteboards = current_user.get_whiteboards()
+		row = 0
+		buttons = []
+		newline = '\n'
+		for elem in whiteboards:
+
+			whiteboard = customtkinter.CTkButton(
+				master = only_whiteboards_frame,
+				command = lambda x=elem[0]: whiteboard_display(x),
+				image = whiteboards_image,
+				width = 250,
+				height = 50,
+				text = f"{elem[2]} {newline} {elem[5].strftime('%Y-%m-%d %H:%M')}",
+				anchor = 'w',
+				fg_color = '#1f1f1f',
+				bg_color = '#282828',
+				background_corner_colors = ['#282828','#282828','#282828','#282828'],
+				border_color = '#1a6eb5',
+				hover_color = '#323232',
+				border_width = 1,
+				)
+			whiteboard.grid(row=row, column=0, padx=10, pady=(10, 10))
+			row += 1
+			buttons.append(whiteboard)
+
+	def whiteboard_display(whiteboard_id):
+
+		whiteboards = peko_database.get_whiteboard(whiteboard_id)
+
+		switch_screen(whiteboard_display_screen)
+
+		whiteboard_title_label.configure(text = whiteboards[2])
+		whiteboard_picture = customtkinter.CTkImage(Image.open(whiteboards[3]), size = (476, 564))
+		whiteboard_title_label.place(x=20, y=20)
+
+		whiteboard_picture_button = customtkinter.CTkButton(
+			master = whiteboard_display_screen,
+			image = whiteboard_picture,
+			width = 476,
+			height = 564,
+			bg_color = lgrey,
+			fg_color = lgrey,
+			text = '',
+			border_width = 0,
+			hover_color = lgrey
+			)
+		whiteboard_picture_button.place(x=3,y=60)
 
 	def show_all_recordings():
 		# self-explanatory
 		lights_out(recordings_button)
 		recordings_button.configure(fg_color="#1a6eb5", hover_color = '#317dbc')
 		set_wawla('Recordings')
+		switch_frame(only_recordings_frame)
 		update_wawla_text()
 		print("test: recordings")
-
 
 	def show_all_contacts():
 		# self-explanatory
@@ -433,7 +482,6 @@ def run_app():
 		contact_display_name_label.place(x=30,y=50)
 		contact_display_avatar_button.place(x=20,y=120)
 
-
 	def show_history():
 		# self-explanatory
 		lights_out(history_button)
@@ -442,7 +490,6 @@ def run_app():
 		switch_frame(history_frame)
 		update_wawla_text()
 
-
 	def show_settings():
 		# self-explanatory
 		lights_out(settings_button)
@@ -450,7 +497,6 @@ def run_app():
 		set_wawla('Settings')
 		switch_frame(settings_frame)
 		update_wawla_text()
-
 
 	def show_add_content_screen():
 		switch_screen(add_content_screen)
@@ -468,17 +514,38 @@ def run_app():
 	def new_note_cancel():
 		switch_screen(add_content_screen)
 
+	def note_tags():
+		tags = []
+		if note_tag_personal_button.cget('fg_color') == bluey:
+			tags.append('Personal')
+		if note_tag_work_button.cget('fg_color') == bluey:
+			tags.append('School')
+		if note_tag_school_button.cget('fg_color') == bluey:
+			tags.append('Work')
+		if note_tag_other_button.cget('fg_color') == bluey:
+			tags.append('Other')
+		return tags
+
+	def whiteboard_tags():
+		tags = []
+		if whiteboard_tag_personal_button.cget('fg_color') == bluey:
+			tags.append('Personal')
+		if whiteboard_tag_work_button.cget('fg_color') == bluey:
+			tags.append('School')
+		if whiteboard_tag_school_button.cget('fg_color') == bluey:
+			tags.append('Work')
+		if whiteboard_tag_other_button.cget('fg_color') == bluey:
+			tags.append('Other')
+		return tags
+
 	def new_note_submit():
 		title = new_note_title_tb.get().strip()
 		favorite = check_if_fav_button()
 		content = new_note_content_tb.get('0.0', 'end').strip()
 
-		tag_name = new_note_tag_combobox.get().strip()
-		peko_database.insert_tag(current_user.user_id, tag_name)
+		tags = note_tags()
 
-		tag_id = peko_database.get_tag_id(tag_name)
-
-		peko_database.insert_text_note(current_user.user_id, title, content, favorite, tag_id)
+		peko_database.insert_text_note(current_user.user_id, title, content, favorite, tags)
 		switch_screen(add_content_screen)
 
 	def check_if_fav_button():
@@ -533,7 +600,23 @@ def run_app():
 		switch_screen(add_content_screen)
 
 	def save_new_whiteboard():
-		pass
+		# Allow the user to choose the location and file name
+		file_path = asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png")])
+		# how?
+		if file_path:
+			x = add_whiteboard_screen.winfo_rootx() + canvas.winfo_x()
+			y = add_whiteboard_screen.winfo_rooty() + canvas.winfo_y()
+			x1 = x + canvas.winfo_width()
+			y1= y + canvas.winfo_height()
+			ImageGrab.grab().crop((x,y,x1,y1)).save(file_path)
+
+		# add to database
+		title = whiteboard_title_tb.get().strip()
+		content = file_path
+		favorite = new_whiteboard_fav()
+		tags = whiteboard_tags()
+		print(tags)
+		peko_database.insert_whiteboard(current_user.user_id, title, content, favorite, tags)
 
 	def new_contact_submit():
 		global avatar_file_path
@@ -595,7 +678,17 @@ def run_app():
 	def show_search():
 		pass
 
+	def note_tags_light_up(button):
+	    if button.cget('fg_color') == grey:
+	        button.configure(fg_color = bluey, hover_color = bluehover)
+	    else:
+	        button.configure(fg_color = grey, hover_color = '#474747')
 
+	def whiteboard_tags_light_up(button):
+	    if button.cget('fg_color') == grey:
+	        button.configure(fg_color = bluey, hover_color = bluehover)
+	    else:
+	        button.configure(fg_color = grey, hover_color = '#474747')
 
 	# Left Panel Image and Buttons - MAIN
 
@@ -826,11 +919,6 @@ def run_app():
 	font = font
 		     )
 	other_button.place(x=20, y=480)
-
-
-
-
-
 
 	# Hisory Button
 	history_image = customtkinter.CTkImage(Image.open(current_path + "/gui/history_icon.png"), size=(20, 20))
@@ -1248,7 +1336,7 @@ def run_app():
 	master = add_content_screen,
 	text = 'Recording',
 	bg_color = '#323232',
-	font=('Segoe', 16, 'bold'),
+	font = ('Segoe', 16, 'bold'),
 	text_color = 'white'
 		)
 	recording_text.place(x=356, y=220)
@@ -1265,24 +1353,16 @@ def run_app():
 		border_width = 3
 		)
 
-	new_note_title_text = customtkinter.CTkLabel(
-		master = add_text_note_screen,
-		text = 'Title:',
-		font = ('Segoe', 24, 'bold')
-		)
-	new_note_title_text.place(x=25, y=25)
-
 	new_note_title_tb = customtkinter.CTkEntry(
 		master = add_text_note_screen,
 		width = 400,
 		height = 30,
-		font = font,
+		font = ('Segoe', 16, 'bold'),
+		placeholder_text = 'Title...',
 		border_width = 1,
-		#border_color = '#317dbc',
 		fg_color = '#474747'
-
 		)
-	new_note_title_tb.place(x=25, y=60)
+	new_note_title_tb.place(x=25, y=25)
 
 	favorites_filled_image = customtkinter.CTkImage(Image.open(current_path + "/gui/favorites_filled.png"), size=(32, 32))
 	favorites_empty_image = customtkinter.CTkImage(Image.open(current_path + "/gui/favorites_icon.png"), size=(32, 32))
@@ -1299,55 +1379,104 @@ def run_app():
 		background_corner_colors = ['#323232', '#323232', '#323232', '#323232'],
 		hover_color = '#323232'
 		)
-	new_note_favorite_button.place(x=437, y=54)
-
-	new_note_content_text = customtkinter.CTkLabel(
-		master = add_text_note_screen,
-		text = 'Content:',
-		font = ('Segoe', 16, 'bold')
-		)
-	new_note_content_text.place(x=25, y=90)
+	new_note_favorite_button.place(x=437, y=18)
 
 	new_note_content_tb = customtkinter.CTkTextbox(
 		master = add_text_note_screen,
 		width = 450,
 		height = 420,
 		wrap = 'word',
-		font = font,
+		font = ('Segoe', 16),
 		#border_color = '#317dbc',
 		border_width = 1,
 		fg_color = '#474747'
 		)
-	new_note_content_tb.place(x=25, y=120)
+	new_note_content_tb.place(x=25, y=70)
 
 	new_note_tag_text = customtkinter.CTkLabel(
 		master = add_text_note_screen,
-		text = 'Tag:',
-		font = ('Segoe', 16, 'bold')
+		text = 'Tags',
+		font = ('Segoe', 14, 'bold')
 		)
-	new_note_tag_text.place(x=25, y=540)
+	new_note_tag_text.place(x=25, y=490)
 
-	new_note_tag_combobox = customtkinter.CTkComboBox(
-		master = add_text_note_screen,
-		width = 160,
-		font = font,
-		dropdown_font = font,
-		values = ['I', 'am', 'testing', 'stuff'],
-		border_width = 1,
-		#border_color = '#317dbc',
-		fg_color = '#474747',
-		button_color = '#1a6eb5',
-		button_hover_color = '#317dbc',
-		dropdown_fg_color = '#474747',
-		dropdown_hover_color = '#317dbc'
-		)
-	new_note_tag_combobox.place(x=25, y=570)
+	# Personal Tag
+	note_tag_personal_button = customtkinter.CTkButton(
+	master = add_text_note_screen,
+	command = lambda: note_tags_light_up(note_tag_personal_button),
+	image = personal_image,
+	text = 'Personal',
+	width = 110,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	font = font
+		     )
+	note_tag_personal_button.place(x=24, y=520)
+
+	# Work Tag
+	note_tag_work_button = customtkinter.CTkButton(
+	master = add_text_note_screen,
+	command = lambda: note_tags_light_up(note_tag_work_button),
+	image = work_image,
+	text = 'Work',
+	width = 110,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	font = font
+		     )
+	note_tag_work_button.place(x=139, y=520)
+
+	# School Tag
+	note_tag_school_button = customtkinter.CTkButton(
+	master = add_text_note_screen,
+	command = lambda: note_tags_light_up(note_tag_school_button),
+	image = school_image,
+	text = 'School',
+	width = 110,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	font = font
+		     )
+	note_tag_school_button.place(x=254, y=520)
+
+	# Other Tag
+	note_tag_other_button = customtkinter.CTkButton(
+	master = add_text_note_screen,
+	command = lambda: note_tags_light_up(note_tag_other_button),
+	image = other_image,
+	text = 'Other',
+	width = 110,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	font = font
+		     )
+	note_tag_other_button.place(x=369, y=520)
 
 	new_note_cancel_button = customtkinter.CTkButton(
 	master = add_text_note_screen,
 	command = new_note_cancel,
 	text = 'Cancel',
-	font=('Segoe', 22),
+	font=('Segoe', 16),
 	width = 110,
 	height = 36,
 	fg_color = '#474747',
@@ -1355,13 +1484,13 @@ def run_app():
 	background_corner_colors = ['#323232', '#323232', '#323232', '#323232'],
 	bg_color = '#323232'
 		     )
-	new_note_cancel_button.place(x=225, y=570)
+	new_note_cancel_button.place(x=250, y=580)
 
 	new_note_submit_button = customtkinter.CTkButton(
 	master = add_text_note_screen,
 	command = new_note_submit,
 	text = 'Submit',
-	font=('Segoe', 22, 'bold'),
+	font=('Segoe', 16, 'bold'),
 	width = 110,
 	height = 36,
 	fg_color = '#1a6eb5',
@@ -1369,8 +1498,7 @@ def run_app():
 	background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
 	bg_color = '#323232'
 		     )
-	new_note_submit_button.place(x=365, y=570)
-
+	new_note_submit_button.place(x=365, y=580)
 
 	text_note_display_screen = customtkinter.CTkFrame(
 	master = app,
@@ -1765,14 +1893,14 @@ def run_app():
 	    is_drawing = False
 
 	canvas = tkinter.Canvas(add_whiteboard_screen, bg="white")
-	canvas.place(x=4, y=74)
-	canvas.config(width=612, height=630)
+	canvas.place(x=4, y=90)
+	canvas.config(width=612, height=560)
 
 	canvas.bind("<Button-1>", start_drawing)
 	canvas.bind("<B1-Motion>", draw)
 	canvas.bind("<ButtonRelease-1>", stop_drawing)
 
-	save_whiteboad_button = customtkinter.CTkButton(
+	save_whiteboard_button = customtkinter.CTkButton(
 		master = add_whiteboard_screen,
 		command = save_new_whiteboard,
 		text = 'Save',
@@ -1784,7 +1912,7 @@ def run_app():
 		background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
 		bg_color = '#323232'
 		     )
-	save_whiteboad_button.place(x=370, y=585)
+	save_whiteboard_button.place(x=365, y=600)
 
 	cancel_new_whiteboard_button = customtkinter.CTkButton(
 		master = add_whiteboard_screen,
@@ -1798,7 +1926,7 @@ def run_app():
 		background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 		bg_color = lgrey
 		     )
-	cancel_new_whiteboard_button.place(x=230, y=585)
+	cancel_new_whiteboard_button.place(x=250, y=600)
 
 	def clear_canvas():
 		canvas.delete("all")
@@ -1815,34 +1943,18 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey
 	     )
-	clear_canvas_button.place(x=20, y=585)
+	clear_canvas_button.place(x=20, y=600)
 
 	whiteboard_title_tb = customtkinter.CTkEntry(
 		master = add_whiteboard_screen,
 		placeholder_text = 'Title...',
 		font = ('Segoe', 16, 'bold'),
-		width = 230,
-		height = 50,
+		width = 400,
+		height = 30,
 		border_width = 1,
-		bg_color = lgrey,
-		fg_color = lgrey
+		fg_color = '#474747'
 		)
-	whiteboard_title_tb.place(x=5, y=5)
-
-	new_whiteboard_tag_combobox = customtkinter.CTkComboBox(
-		master = add_whiteboard_screen,
-		width = 160,
-		font = font,
-		dropdown_font = font,
-		values = [''],
-		border_width = 1,
-		fg_color = '#474747',
-		button_color = '#1a6eb5',
-		button_hover_color = '#317dbc',
-		dropdown_fg_color = '#474747',
-		dropdown_hover_color = '#317dbc',
-		)
-	new_whiteboard_tag_combobox.place(x=250, y=20)
+	whiteboard_title_tb.place(x=25, y=25)
 
 	new_whiteboard_favorite_button = customtkinter.CTkButton(
 		master = add_whiteboard_screen,
@@ -1856,7 +1968,107 @@ def run_app():
 		background_corner_colors = [lgrey, lgrey, lgrey, lgrey],
 		hover_color = lgrey
 		)
-	new_whiteboard_favorite_button.place(x=430, y=12)
+	new_whiteboard_favorite_button.place(x=437, y=18)
+
+	new_whiteboard_tag_text = customtkinter.CTkLabel(
+		master = add_whiteboard_screen,
+		text = 'Tags',
+		font = ('Segoe', 14, 'bold')
+		)
+	new_whiteboard_tag_text.place(x=25, y=530)
+
+	# Personal Tag
+	whiteboard_tag_personal_button = customtkinter.CTkButton(
+	master = add_whiteboard_screen,
+	command = lambda: whiteboard_tags_light_up(whiteboard_tag_personal_button),
+	image = personal_image,
+	text = 'Personal',
+	width = 110,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	font = font
+		     )
+	whiteboard_tag_personal_button.place(x=24, y=560)
+
+	# Work Tag
+	whiteboard_tag_work_button = customtkinter.CTkButton(
+	master = add_whiteboard_screen,
+	command = lambda: whiteboard_tags_light_up(whiteboard_tag_work_button),
+	image = work_image,
+	text = 'Work',
+	width = 110,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	font = font
+		     )
+	whiteboard_tag_work_button.place(x=139, y=560)
+
+	# School Tag
+	whiteboard_tag_school_button = customtkinter.CTkButton(
+	master = add_whiteboard_screen,
+	command = lambda: whiteboard_tags_light_up(whiteboard_tag_school_button),
+	image = school_image,
+	text = 'School',
+	width = 110,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	font = font
+		     )
+	whiteboard_tag_school_button.place(x=254, y=560)
+
+	# Other Tag
+	whiteboard_tag_other_button = customtkinter.CTkButton(
+	master = add_whiteboard_screen,
+	command = lambda: whiteboard_tags_light_up(whiteboard_tag_other_button),
+	image = other_image,
+	text = 'Other',
+	width = 110,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	font = font
+		     )
+	whiteboard_tag_other_button.place(x=369, y=560)
+
+	whiteboard_display_screen = customtkinter.CTkFrame(
+		master = app,
+		width = 500,
+		height = 640,
+		bg_color = '#323232',
+		fg_color = '#323232',
+		border_color = '#1a6eb5',
+		border_width = 3
+	)
+
+	whiteboard_title_label = customtkinter.CTkLabel(
+		master = whiteboard_display_screen,
+		width = 450,
+		height = 30,
+		text = '',
+		font = ('Segoe', 24, 'bold'),
+		text_color = '#474747',
+		wraplength=480,
+		justify = 'left'
+		)
 
 
 
@@ -2023,7 +2235,7 @@ def run_app():
 
 	# List of ShowScreens
 	screen_list = [add_content_screen, add_text_note_screen, text_note_display_screen, add_contact_screen,
-	contact_display_screen, add_whiteboard_screen, add_reminder_screen]
+	contact_display_screen, add_whiteboard_screen, add_reminder_screen, whiteboard_display_screen]
 
 	#run app
 	app.mainloop()

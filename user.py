@@ -16,4 +16,7 @@ class User:
 	def get_contacts(self):
 		return db.get_contacts(self.user_id)
 
+	def get_whiteboards(self):
+		return db.get_whiteboards(self.user_id)
+
 

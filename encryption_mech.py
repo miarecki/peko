@@ -5,7 +5,6 @@ import re
 def acc_name_check(acc_name):
 	return len(acc_name) <= 16 and bool(re.compile(r'^[a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ_]+$').match(acc_name))
 
-
 def create_new_account(acc_name, password1, password2):
 
 	message = ''
@@ -33,7 +32,7 @@ def create_new_account(acc_name, password1, password2):
 	ph = PasswordHasher()
 	hashed_password = ph.hash(password1)
 
-	peko_database.db_add_user(acc_name, hashed_password, enc_key = 'test')
+	peko_database.db_add_user(acc_name, hashed_password)
 	message = 'Success!'
 	return message
 
