@@ -1,97 +1,95 @@
 -- Create Users table
 CREATE TABLE Users (
-    user_id SERIAL PRIMARY KEY,
+    user_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    encryption_key VARCHAR(255) NOT NULL
+    password_hash VARCHAR(255) NOT NULL
 );
 
 -- Create Contacts table
 CREATE TABLE Contacts (
-    contact_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
-    contact_avatar VARCHAR(255) DEFAULT '/gui/avatar_default.png';
+    contact_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    contact_avatar VARCHAR(255) DEFAULT '/gui/avatar_default.png',
     contact_display_name VARCHAR(255) NOT NULL,
     contact_first_name VARCHAR(255),
     contact_last_name VARCHAR(255),
     contact_phone VARCHAR(255),
-    contact_email VARCHAR(255),
+    contact_email VARCHAR(255)
 );
 
 -- Create Settings table
 CREATE TABLE Settings (
-    setting_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
-    mode VARCHAR(50) NOT NULL,
-    button_color VARCHAR(50) NOT NULL
+    setting_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER UNIQUE REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    theme VARCHAR(50) NOT NULL
 );
 
--- Create Trash table
-CREATE TABLE Trash (
-    trash_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
-    note_id INT,
-    whiteboard_note_id INT,
-    reminder_id INT,
-    recording_id INT,
-    deleted_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+--- Type Enum Table
+CREATE TABLE Type (
+    type_name VARCHAR(50) PRIMARY KEY NOT NULL);
+INSERT INTO Type(type_name) VALUES ('Text Note'), ('Whiteboard'), ('Recording'), ('Reminder'), ('Contact');
+
+--- Action Enum Table
+CREATE TABLE Action (
+    action_name VARCHAR(50) PRIMARY KEY NOT NULL);
+INSERT INTO Action(action_name) VALUES ('Create'), ('Edit'), ('Delete');
+
+-- Create History table
+CREATE TABLE History (
+    history_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    action_type VARCHAR(50) REFERENCES Action(action_name) ON UPDATE CASCADE ON DELETE RESTRICT,
+    item_type VARCHAR(50) REFERENCES Type(type_name) ON UPDATE CASCADE ON DELETE RESTRICT,
+    item_name VARCHAR(255),
+    action_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create Tags table
+--- Tag Enum Table
 CREATE TABLE Tags (
-    tag_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
-    tag VARCHAR(50) NOT NULL
-);
+    tag_name VARCHAR(50) PRIMARY KEY NOT NULL);
+INSERT INTO Tags(tag_name) VALUES ('Personal'), ('School'), ('Work'), ('Other');
 
 -- Create Notes table
 CREATE TABLE Notes (
-    note_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+    note_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     title VARCHAR(255) NOT NULL,
     content TEXT,
     creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_edit TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     favorite BOOLEAN,
-    tag_id INT REFERENCES Tags(tag_id) ON DELETE SET NULL
+    tag VARCHAR(50) DEFAULT NULL REFERENCES Tags(tag_name) ON UPDATE CASCADE ON DELETE RESTRICT 
 );
 
 -- Create WhiteboardNotes table
 CREATE TABLE WhiteboardNotes (
-    whiteboard_note_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+    whiteboard_note_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     title VARCHAR(255) NOT NULL,
     content TEXT,
+    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_edit TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     favorite BOOLEAN,
-    tag_id INT REFERENCES Tags(tag_id) ON DELETE SET NULL
+    tag VARCHAR(50) DEFAULT NULL REFERENCES Tags(tag_name) ON UPDATE CASCADE ON DELETE RESTRICT 
 );
 
 -- Create Recordings table
 CREATE TABLE Recordings (
-    recording_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+    recording_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     title VARCHAR(255) NOT NULL,
     content TEXT,
     favorite BOOLEAN,
-    tag_id INT REFERENCES Tags(tag_id) ON DELETE SET NULL
+    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    tag VARCHAR(50) DEFAULT NULL REFERENCES Tags(tag_name) ON UPDATE CASCADE ON DELETE RESTRICT 
 );
 
 -- Create Reminders table
 CREATE TABLE Reminders (
-    reminder_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+    reminder_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_edit TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Create Statistics table
-CREATE TABLE Statistics (
-    statistics_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
-    notes_created INT DEFAULT 0,
-    whiteboardnotes_created INT DEFAULT 0,
-    notes_deleted INT DEFAULT 0,
-    whiteboardnotes_deleted INT DEFAULT 0
+    remind_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
