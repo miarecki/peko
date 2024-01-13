@@ -5,6 +5,52 @@ CREATE TABLE Users (
     password_hash VARCHAR(255) NOT NULL
 );
 
+
+-- Create Notes table
+CREATE TABLE Notes (
+    note_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    content TEXT,
+    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_edit TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    favorite BOOLEAN,
+    is_deleted BOOLEAN DEFAULT false
+);
+
+-- Create WhiteboardNotes table
+CREATE TABLE WhiteboardNotes (
+    whiteboard_note_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    content TEXT,
+    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_edit TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    favorite BOOLEAN,
+    is_deleted BOOLEAN DEFAULT false
+);
+
+-- Create Recordings table
+CREATE TABLE Recordings (
+    recording_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    content TEXT,
+    favorite BOOLEAN,
+    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT false
+);
+
+-- Create Reminders table
+CREATE TABLE Reminders (
+    reminder_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    remind_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create Contacts table
 CREATE TABLE Contacts (
     contact_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -49,50 +95,27 @@ CREATE TABLE Tags (
     tag_name VARCHAR(50) PRIMARY KEY NOT NULL);
 INSERT INTO Tags(tag_name) VALUES ('Personal'), ('School'), ('Work'), ('Other');
 
--- Create Notes table
-CREATE TABLE Notes (
-    note_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    title VARCHAR(255) NOT NULL,
-    content TEXT,
-    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_edit TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    favorite BOOLEAN,
-    tag VARCHAR(50) DEFAULT NULL REFERENCES Tags(tag_name) ON UPDATE CASCADE ON DELETE RESTRICT,
-    is_deleted BOOLEAN
+-- Junction table for many-to-many relationship between Tags and Notes
+CREATE TABLE NotesTags (
+    id INTEGER REFERENCES Notes(note_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    tag_name VARCHAR(50) REFERENCES Tags(tag_name) ON UPDATE CASCADE ON DELETE RESTRICT,
+    PRIMARY KEY (id, tag_name)
 );
 
--- Create WhiteboardNotes table
-CREATE TABLE WhiteboardNotes (
-    whiteboard_note_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    title VARCHAR(255) NOT NULL,
-    content TEXT,
-    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_edit TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    favorite BOOLEAN,
-    tag VARCHAR(50) DEFAULT NULL REFERENCES Tags(tag_name) ON UPDATE CASCADE ON DELETE RESTRICT,
-    is_deleted BOOLEAN
+-- Junction table for many-to-many relationship between Tags and WhiteboardNotes
+CREATE TABLE WhiteboardsTags (
+    id INTEGER REFERENCES WhiteboardNotes(whiteboard_note_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    tag_name VARCHAR(50) REFERENCES Tags(tag_name) ON UPDATE CASCADE ON DELETE RESTRICT,
+    PRIMARY KEY (id, tag_name)
 );
 
--- Create Recordings table
-CREATE TABLE Recordings (
-    recording_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    title VARCHAR(255) NOT NULL,
-    content TEXT,
-    favorite BOOLEAN,
-    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    tag VARCHAR(50) DEFAULT NULL REFERENCES Tags(tag_name) ON UPDATE CASCADE ON DELETE RESTRICT,
-    is_deleted BOOLEAN
+-- Junction table for many-to-many relationship between Tags and Recordings
+CREATE TABLE RecoringsTags (
+    id INTEGER REFERENCES Recordings(recording_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    tag_name VARCHAR(50) REFERENCES Tags(tag_name) ON UPDATE CASCADE ON DELETE RESTRICT,
+    PRIMARY KEY (id, tag_name)
 );
 
--- Create Reminders table
-CREATE TABLE Reminders (
-    reminder_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    remind_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+
+
+
