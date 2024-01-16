@@ -19,4 +19,7 @@ class User:
 	def get_whiteboards(self):
 		return db.get_whiteboards(self.user_id)
 
+	def get_reminders(self):
+		return db.get_reminders(self.user_id)
+
 

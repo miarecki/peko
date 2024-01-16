@@ -5,7 +5,6 @@ CREATE TABLE Users (
     password_hash VARCHAR(255) NOT NULL
 );
 
-
 -- Create Notes table
 CREATE TABLE Notes (
     note_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

@@ -10,7 +10,6 @@ def db_connect():
 		password = ':)',
 		port = '5432',
 		)
-
 # =========================================================
 
 def db_create():
@@ -563,6 +562,62 @@ def get_whiteboard(wid):
 		c.execute('''SELECT * FROM WhiteboardNotes
 			WHERE whiteboard_note_id = %s;
 ''', (wid,))
+
+		result = c.fetchone()
+		return result
+
+	finally:
+
+		db_connect.conn.commit()
+		db_connect.conn.close()
+
+# ================================
+
+def insert_reminder(uid, title, desc, rem_date):
+    db_connect()
+    c = db_connect.conn.cursor()
+
+    try:
+        c.execute('''
+            INSERT INTO Reminders(user_id, title, description, remind_date)
+            VALUES (%s, %s, %s, %s);
+        ''', (uid, title, desc, rem_date))
+
+    finally:
+        db_connect.conn.commit()
+        db_connect.conn.close()
+
+# ================================
+
+def get_reminders(uid):
+
+	db_connect()
+	c = db_connect.conn.cursor() 
+
+	try:
+		c.execute('''SELECT * FROM Reminders
+			WHERE user_id = %s;
+''', (uid,))
+
+		result = c.fetchall()
+		return result
+
+	finally:
+
+		db_connect.conn.commit()
+		db_connect.conn.close()
+
+# ================================
+
+def get_reminder(rid):
+
+	db_connect()
+	c = db_connect.conn.cursor() 
+
+	try:
+		c.execute('''SELECT * FROM Reminders
+			WHERE reminder_id = %s;
+''', (rid,))
 
 		result = c.fetchone()
 		return result

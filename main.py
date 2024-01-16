@@ -5,15 +5,14 @@ import customtkinter
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 import os
 from PIL import Image, ImageTk, ImageDraw, ImageGrab
+import pyaudio
+import wave
+import threading
+
 import peko_database
 import encryption_mech
 from user import User
 
-# LOGIN PAGE:
-# 2do: 	- whiteboards
-#		- recordings
-#		- everything else
-#		- encryption
 
 # colors:
 dgrey = '#1f1f1f'
@@ -189,23 +188,16 @@ def run_login_page():
 			)
 	new_account_confirm_password_tb.place(x=365, y=282)
 
-
 	# TEXT ELEMENTS
 
 	# Bottom text: created
 
-
-
 	# Bottom text: git link
-
 
 	# Error text
 
-
-
 	# Run
 	login_page.mainloop()
-
 
 # MAIN APP
 
@@ -218,6 +210,9 @@ def run_app():
 	default_avatar_display_image = customtkinter.CTkImage(Image.open(current_path + '/gui/avatar_default.png'), size=(128, 128))
 	default_user_avatar =  customtkinter.CTkImage(Image.open(current_path + '/gui/avatars/test_user_avatar.jpg'), size=(64, 64))
 	font = ('Segoe', 15)
+
+	is_recording = False
+	frames = []
 
 	# App Frame
 	app = customtkinter.CTk()
@@ -281,6 +276,46 @@ def run_app():
 		update_wawla_text()
 		switch_frame(reminders_frame)
 		print("test: reminders")
+
+		reminders_list = []
+
+		reminders = current_user.get_reminders() 
+		row = 1
+		buttons = []
+		newline = '\n'
+		for elem in reminders:
+
+			reminder = customtkinter.CTkButton(
+				master = reminders_frame,
+				command = lambda x=elem[0]: reminder_display(x),
+				image = reminders_image,
+				width = 250,
+				height = 50,
+				text = f"{elem[2]} {newline} {elem[5].strftime('%d-%m-%Y')}",
+				font=('Segoe', 15, 'bold'),
+				anchor = 'w',
+				fg_color = '#1f1f1f',
+				bg_color = '#282828',
+				background_corner_colors = ['#282828','#282828','#282828','#282828'],
+				border_color = '#1a6eb5',
+				hover_color = '#323232',
+				)
+			reminder.grid(row=row, column=0, padx=10, pady=(0, 20))
+			row += 1
+			buttons.append(reminder)
+
+	def reminder_display(reminder_id):
+
+		reminder = peko_database.get_reminder(reminder_id)
+		switch_screen(reminder_display_screen)
+
+		reminder_display_title_label.configure(text = reminder[2])
+		reminder_display_description_label.configure(text = reminder[3])
+		reminder_display_due_date_label.configure(text = reminder[5].strftime('%d-%m-%Y'))
+
+		reminder_display_title_label.place(x=20,y=50)
+		reminder_display_description_label.place(x=20,y=80)
+		reminder_display_due_date_label.place(x=20,y=120)
 
 	def show_all_favorites():
 		# self-explanatory
@@ -509,7 +544,7 @@ def run_app():
 		switch_screen(add_whiteboard_screen)
 
 	def add_new_recording_note():
-		pass
+		switch_screen(add_recording_screen)
 
 	def new_note_cancel():
 		switch_screen(add_content_screen)
@@ -558,11 +593,6 @@ def run_app():
 			return False
 		return True
 
-	def check_if_fav_button3():
-		if new_reminder_favorite_button.cget("image") == favorites_empty_image:
-			return False
-		return True
-
 	def new_note_fav():
 		if new_note_favorite_button.cget("image") == favorites_empty_image:
 			new_note_favorite_button.configure(image = favorites_filled_image)
@@ -575,11 +605,11 @@ def run_app():
 		else:
 			new_whiteboard_favorite_button.configure(image = favorites_empty_image)
 
-	def new_reminder_fav():
-		if new_reminder_favorite_button.cget("image") == favorites_empty_image:
-			new_reminder_favorite_button.configure(image = favorites_filled_image)
+	def new_recording_fav():
+		if new_recording_favorite_button.cget("image") == favorites_empty_image:
+			new_recording_favorite_button.configure(image = favorites_filled_image)
 		else:
-			new_reminder_favorite_button.configure(image = favorites_empty_image)
+			new_recording_favorite_button.configure(image = favorites_empty_image)
 
 	def add_new_contact_clicked():
 		switch_screen(add_contact_screen)
@@ -615,7 +645,6 @@ def run_app():
 		content = file_path
 		favorite = new_whiteboard_fav()
 		tags = whiteboard_tags()
-		print(tags)
 		peko_database.insert_whiteboard(current_user.user_id, title, content, favorite, tags)
 
 	def new_contact_submit():
@@ -638,10 +667,12 @@ def run_app():
 		switch_screen(add_reminder_screen)
 
 	def new_reminder_submit():
-		pass
+		uid = current_user.user_id
+		title = new_reminder_title_tb.get().strip()
+		desc = new_reminder_content_tb.get('0.0', 'end').strip()
+		rem_date = str_dt
 
-	def new_reminder_cancel():
-		pass
+		peko_database.insert_reminder(uid, title, desc, rem_date)
 
 	def show_all_personal():
 		# self-explanatory
@@ -689,6 +720,60 @@ def run_app():
 	        button.configure(fg_color = bluey, hover_color = bluehover)
 	    else:
 	        button.configure(fg_color = grey, hover_color = '#474747')
+
+	def recording_tags_light_up(button):
+	    if button.cget('fg_color') == grey:
+	        button.configure(fg_color = bluey, hover_color = bluehover)
+	    else:
+	        button.configure(fg_color = grey, hover_color = '#474747')	
+
+	def new_recording_submit():
+		global frames, audio
+		filename = asksaveasfilename(defaultextension=".wav",
+		 filetypes=[("WAV files", "*.wav")])
+		if filename:
+			wf = wave.open(filename, 'wb')
+			wf.setnchannels(1)
+			wf.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
+			wf.setframerate(44100)
+			wf.writeframes(b''.join(frames))
+			wf.close()
+			frames = []
+
+		audio = pyaudio.PyAudio()
+
+	def start_recording():
+
+		recording_button.configure(state = 'disabled', fg_color = dgrey)
+		new_recording_submit_button.configure(state = 'disabled', fg_color = dgrey)
+		stop_recording_button.configure(state = 'normal', fg_color = bluey, hover_color = bluehover)
+		threading.Thread(target=record).start()
+
+	def record():
+		global is_recording, frames, audio
+		is_recording = True
+
+		audio = pyaudio.PyAudio()
+		stream = audio.open(format = pyaudio.paInt16, channels = 1, rate = 44100,
+		input = True, frames_per_buffer = 1024)
+		frames = []
+		while is_recording:
+			data = stream.read(1024)
+			frames.append(data)
+		stream.stop_stream()
+		stream.close()
+		audio.terminate()
+
+	def stop_recording():
+		global is_recording
+
+		recording_button.configure(state = 'normal', fg_color = bluey, hover_color = bluehover)
+		new_recording_submit_button.configure(state = 'normal', fg_color = bluey, hover_color = bluehover)
+		stop_recording_button.configure(state = 'disabled', fg_color = dgrey)
+
+		is_recording = False
+
+
 
 	# Left Panel Image and Buttons - MAIN
 
@@ -2071,14 +2156,6 @@ def run_app():
 		)
 
 
-
-
-
-
-
-
-
-
 # ==================================== REMINDERS ==========================================
 
 	add_reminder_screen = customtkinter.CTkFrame(
@@ -2125,20 +2202,6 @@ def run_app():
 		)
 	new_reminder_title_tb.place(x=25, y=60)
 
-	new_reminder_favorite_button = customtkinter.CTkButton(
-		master = add_reminder_screen,
-		width = 32,
-		height = 32,
-		command = new_reminder_fav,
-		text = "",
-		image = favorites_empty_image,
-		fg_color = '#323232',
-		bg_color = '#323232',
-		background_corner_colors = ['#323232', '#323232', '#323232', '#323232'],
-		hover_color = '#323232'
-		)
-	new_reminder_favorite_button.place(x=437, y=54)
-
 	new_reminder_content_text = customtkinter.CTkLabel(
 		master = add_reminder_screen,
 		text = 'Description:',
@@ -2174,7 +2237,7 @@ def run_app():
 
 	new_reminder_cancel_button = customtkinter.CTkButton(
 		master = add_reminder_screen,
-		command = new_reminder_cancel,
+		command = new_note_cancel,
 		text = 'Cancel',
 		font=('Segoe', 16),
 		width = 110,
@@ -2201,10 +2264,219 @@ def run_app():
 	new_reminder_submit_button.place(x=365, y=335)
 
 
+# =========	               REMINDER DISPLAY                  ==============
+
+	reminder_display_screen = customtkinter.CTkFrame(
+	master = app,
+	width = 480,
+	height = 600,
+	bg_color = '#323232',
+	fg_color = '#323232'
+	)
+
+	reminder_display_title_label = customtkinter.CTkLabel(
+		master = reminder_display_screen,
+		text = '',
+		font = ('Segoe', 34, 'bold'),
+		text_color = 'white'
+	)
+
+	reminder_display_description_label = customtkinter.CTkLabel(
+		master = reminder_display_screen,
+		text = '',
+		font = ('Segoe', 15),
+		text_color = 'white'
+	)
+
+	reminder_display_due_date_label = customtkinter.CTkLabel(
+		master = reminder_display_screen,
+		text = '',
+		font = ('Segoe', 18, 'bold'),
+		text_color = 'white'
+	)
+
 	
 
 
 
+# ====================================== RECORDINGS =====================================
+
+	add_recording_screen = customtkinter.CTkFrame(
+		master = app,
+		width = 500,
+		height = 650,
+		bg_color = '#323232',
+		fg_color = '#323232',
+		border_width = 3
+		)
+
+	new_recording_title_tb = customtkinter.CTkEntry(
+		master = add_recording_screen,
+		width = 400,
+		height = 30,
+		font = ('Segoe', 16, 'bold'),
+		placeholder_text = 'Title...',
+		border_width = 1,
+		fg_color = '#474747'
+		)
+	new_recording_title_tb.place(x=25, y=25)
+
+	new_recording_favorite_button = customtkinter.CTkButton(
+		master = add_recording_screen,
+		width = 32,
+		height = 32,
+		command = new_recording_fav,
+		text = "",
+		image = favorites_empty_image,
+		fg_color = '#323232',
+		bg_color = '#323232',
+		background_corner_colors = ['#323232', '#323232', '#323232', '#323232'],
+		hover_color = '#323232'
+		)
+	new_recording_favorite_button.place(x=437, y=18)
+
+	#waves_animation = AudioWaves(add_recording_screen)
+
+	# Recording Button
+	recording_button = customtkinter.CTkButton(
+	master = add_recording_screen,
+	command = start_recording,
+	image = recordings_image,
+	text = '',
+	width = 100,
+	height = 100,
+	fg_color = bluey,
+	hover_color = bluehover,
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	corner_radius = 20
+		     )
+	recording_button.place(x=139, y=300)
+
+	# Stop Recording Button
+	stop_image = customtkinter.CTkImage(Image.open(current_path + "/gui/stop_icon.png"), size=(20, 20))
+	stop_recording_button = customtkinter.CTkButton(
+	master = add_recording_screen,
+	command = stop_recording,
+	image = stop_image,
+	text = '',
+	width = 100,
+	height = 100,
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	corner_radius = 20,
+	state = 'disabled'
+		     )
+	stop_recording_button.place(x=250, y=300)
+
+	new_recording_tag_text = customtkinter.CTkLabel(
+		master = add_recording_screen,
+		text = 'Tags',
+		font = ('Segoe', 14, 'bold')
+		)
+	new_recording_tag_text.place(x=25, y=490)
+
+	# Personal Tag
+	recording_tag_personal_button = customtkinter.CTkButton(
+	master = add_recording_screen,
+	command = lambda: recording_tags_light_up(recording_tag_personal_button),
+	image = personal_image,
+	text = 'Personal',
+	width = 110,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	font = font
+		     )
+	recording_tag_personal_button.place(x=24, y=520)
+
+	# Work Tag
+	recording_tag_work_button = customtkinter.CTkButton(
+	master = add_recording_screen,
+	command = lambda: recording_tags_light_up(recording_tag_work_button),
+	image = work_image,
+	text = 'Work',
+	width = 110,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	font = font
+		     )
+	recording_tag_work_button.place(x=139, y=520)
+
+	# School Tag
+	recording_tag_school_button = customtkinter.CTkButton(
+	master = add_recording_screen,
+	command = lambda: recording_tags_light_up(recording_tag_school_button),
+	image = school_image,
+	text = 'School',
+	width = 110,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	font = font
+		     )
+	recording_tag_school_button.place(x=254, y=520)
+
+	# Other Tag
+	recording_tag_other_button = customtkinter.CTkButton(
+	master = add_recording_screen,
+	command = lambda: recording_tags_light_up(recording_tag_other_button),
+	image = other_image,
+	text = 'Other',
+	width = 110,
+	height = 30,
+	compound = 'left',
+	anchor = 'w',
+	fg_color = grey,
+	hover_color = '#474747',
+	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
+	bg_color = lgrey,
+	font = font
+		     )
+	recording_tag_other_button.place(x=369, y=520)
+
+	new_recording_cancel_button = customtkinter.CTkButton(
+	master = add_recording_screen,
+	command = new_note_cancel,
+	text = 'Cancel',
+	font=('Segoe', 16),
+	width = 110,
+	height = 36,
+	fg_color = '#474747',
+	hover_color = '#317dbc',
+	background_corner_colors = ['#323232', '#323232', '#323232', '#323232'],
+	bg_color = '#323232'
+		     )
+	new_recording_cancel_button.place(x=250, y=580)
+
+	new_recording_submit_button = customtkinter.CTkButton(
+	master = add_recording_screen,
+	command = new_recording_submit,
+	text = 'Submit',
+	font=('Segoe', 16, 'bold'),
+	width = 110,
+	height = 36,
+	fg_color = '#1a6eb5',
+	hover_color = '#317dbc',
+	background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
+	bg_color = '#323232'
+		     )
+	new_recording_submit_button.place(x=365, y=580)
 
 
 
@@ -2221,7 +2493,7 @@ def run_app():
 
 
 
-
+# =======================================================================================
 
 	# List of All Buttons
 	button_list = [all_notes_button, reminders_button, favorites_button, statistics_button,
@@ -2235,7 +2507,8 @@ def run_app():
 
 	# List of ShowScreens
 	screen_list = [add_content_screen, add_text_note_screen, text_note_display_screen, add_contact_screen,
-	contact_display_screen, add_whiteboard_screen, add_reminder_screen, whiteboard_display_screen]
+	contact_display_screen, add_whiteboard_screen, add_reminder_screen, whiteboard_display_screen, add_recording_screen,
+	reminder_display_screen]
 
 	#run app
 	app.mainloop()
