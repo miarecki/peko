@@ -129,7 +129,7 @@ CREATE TABLE WhiteboardsTags (
 );
 
 -- Junction table for many-to-many relationship between Tags and Recordings
-CREATE TABLE RecoringsTags (
+CREATE TABLE RecordingsTags (
     id INTEGER REFERENCES Recordings(recording_id) ON DELETE CASCADE ON UPDATE CASCADE,
     tag_name VARCHAR(50) REFERENCES Tags(tag_name) ON UPDATE CASCADE ON DELETE RESTRICT,
     PRIMARY KEY (id, tag_name)
@@ -626,3 +626,70 @@ def get_reminder(rid):
 
 		db_connect.conn.commit()
 		db_connect.conn.close()
+
+# =================
+
+def insert_recording(uid, title, content, fav, tags):
+    db_connect()
+    c = db_connect.conn.cursor()
+
+    try:
+        c.execute('''
+            INSERT INTO Recordings(user_id, title, content, favorite)
+            VALUES (%s, %s, %s, %s)
+            RETURNING recording_id;
+        ''', (uid, title, content, fav))
+
+        # Get the ID of the inserted note
+        recording_id = c.fetchone()[0]
+
+        for tag in tags:
+            c.execute('''
+                INSERT INTO RecordingsTags (id, tag_name)
+                VALUES (%s, %s);
+            ''', (recording_id, tag))
+
+    finally:
+        db_connect.conn.commit()
+        db_connect.conn.close()
+
+# ================================
+
+def get_recordings(uid):
+
+	db_connect()
+	c = db_connect.conn.cursor() 
+
+	try:
+		c.execute('''SELECT * FROM Recordings
+			WHERE user_id = %s;
+''', (uid,))
+
+		result = c.fetchall()
+		return result
+
+	finally:
+
+		db_connect.conn.commit()
+		db_connect.conn.close()
+
+# ================================
+
+def get_recording(rid):
+
+	db_connect()
+	c = db_connect.conn.cursor() 
+
+	try:
+		c.execute('''SELECT * FROM Recordings
+			WHERE recording_id = %s;
+''', (rid,))
+
+		result = c.fetchone()
+		return result
+
+	finally:
+
+		db_connect.conn.commit()
+		db_connect.conn.close()
+
