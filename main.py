@@ -7,12 +7,13 @@ import os
 from PIL import Image, ImageTk, ImageDraw, ImageGrab
 import pyaudio
 import wave
-import threading
-
+import threading 
+import webbrowser
+from pydub import AudioSegment
+import struct
 import peko_database
 import encryption_mech
 from user import User
-
 
 # colors:
 dgrey = '#1f1f1f'
@@ -23,8 +24,7 @@ bluehover = '#317dbc'
 
 global avatar_file_path
 avatar_file_path = ''
-
-
+is_stopped = threading.Event()
 
 def run_login_page():
 
@@ -41,17 +41,18 @@ def run_login_page():
 		login_cred = account_name_tb.get().strip()
 		pass_cred = account_password_tb.get()
 		real_pass = pass_cred
+
+		valid = encryption_mech.log_in(login_cred, real_pass)
 		
-		if encryption_mech.log_in(login_cred, real_pass) == 'Success!':
-			print(f"Log In Success!")
+		if valid == 'Success!':
+			error_text_label.configure(text = valid, text_color = 'green')
 			user_id = peko_database.get_uid(login_cred)
 			global current_user
 			current_user = User(user_id)
-			login_page.destroy() # kinda works
+			login_page.destroy() 
 			run_app()
 		else:
-			print(f":( {encryption_mech.log_in(login_cred, real_pass)}")
-
+			error_text_label.configure(text = valid, text_color = 'red')
 
 	def create_account():
 		# users clicks 'Create Account' button
@@ -63,16 +64,20 @@ def run_login_page():
 		new_real_pass_confirm = new_pass_confirm_cred
 
 		valid = encryption_mech.create_new_account(acc_name_cred, new_real_pass, new_real_pass_confirm)
+
 		if valid == 'Success!':
 			valid
+			error_text_label.configure(text = valid, text_color = 'green')
 			user_id = peko_database.get_uid(acc_name_cred)
 			global current_user
 			current_user = User(user_id)
-			login_page.destroy() # kinda works
+			login_page.destroy()
 			run_app()
 		else:
-			print(valid)
+			error_text_label.configure(text = valid, text_color = 'red')
 
+	def open_github_page():
+		webbrowser.open('https://github.com/miarecki')
 
 	# App Frame
 	login_page = customtkinter.CTk()
@@ -93,108 +98,129 @@ def run_login_page():
 
 	# 'Log In' Button 
 	log_in_button = customtkinter.CTkButton(
-	master = login_page,
-	command = user_log_in,
-	text = 'Log In',
-	width = 160,
-	height = 30,
-	font = ('Segoe', 14, 'bold'),
-	fg_color = '#1a6eb5',
-	hover_color = '#317dbc',
-	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
-	bg_color = '#1f1f1f'
+		master = login_page,
+		command = user_log_in,
+		text = 'Log In',
+		width = 160,
+		height = 30,
+		font = ('Segoe', 14, 'bold'),
+		fg_color = '#1a6eb5',
+		hover_color = '#317dbc',
+		background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
+		bg_color = '#1f1f1f'
 		     )
 	log_in_button.place(x=105, y=282)
 
-
 	# 'Create Account' Button 
 	create_account_button = customtkinter.CTkButton(
-	master = login_page,
-	command = create_account,
-	text = 'Create Account',
-	width = 160,
-	height = 30,
-	font = ('Segoe', 14, 'bold'),
-	fg_color = '#1a6eb5',
-	hover_color = '#317dbc',
-	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
-	bg_color = '#1f1f1f'
+		master = login_page,
+		command = create_account,
+		text = 'Create Account',
+		width = 160,
+		height = 30,
+		font = ('Segoe', 14, 'bold'),
+		fg_color = '#1a6eb5',
+		hover_color = '#317dbc',
+		background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
+		bg_color = '#1f1f1f'
 		     )
 	create_account_button.place(x=375, y=332)
-
 
 	# TEXT BOXES // ENTRIES
 
 	# Account Name TB
 	account_name_tb = customtkinter.CTkEntry(
-	master = login_page,
-	width = 180,
-	height = 30,
-	fg_color = '#282828',
-	border_color = '#1a6eb5',
-	border_width = 3,
-	placeholder_text = ''
+		master = login_page,
+		width = 180,
+		height = 30,
+		fg_color = '#282828',
+		border_color = '#1a6eb5',
+		border_width = 3,
+		placeholder_text = ''
 			)
 	account_name_tb.place(x=95, y=182)
 
 	# Log In Password TB
 	account_password_tb = customtkinter.CTkEntry(
-	master = login_page,
-	width = 180,
-	height = 30,
-	fg_color = '#282828',
-	border_color = '#1a6eb5',
-	border_width = 3,
-	placeholder_text = '',
-	show = '*'
+		master = login_page,
+		width = 180,
+		height = 30,
+		fg_color = '#282828',
+		border_color = '#1a6eb5',
+		border_width = 3,
+		placeholder_text = '',
+		show = '*'
 			)
 	account_password_tb.place(x=95, y=232)
 
 	# New Account Name TB
 	new_account_name_tb = customtkinter.CTkEntry(
-	master = login_page,
-	width = 180,
-	height = 30,
-	fg_color = '#282828',
-	border_color = '#1a6eb5',
-	border_width = 3,
-	placeholder_text = ''
+		master = login_page,
+		width = 180,
+		height = 30,
+		fg_color = '#282828',
+		border_color = '#1a6eb5',
+		border_width = 3,
+		placeholder_text = ''
 			)
 	new_account_name_tb.place(x=365, y=182)
 
 	# New Account Password TB
 	new_account_password_tb = customtkinter.CTkEntry(
-	master = login_page,
-	width = 180,
-	height = 30,
-	fg_color = '#282828',
-	border_color = '#1a6eb5',
-	border_width = 3,
-	placeholder_text = '',
-	show = '*'
+		master = login_page,
+		width = 180,
+		height = 30,
+		fg_color = '#282828',
+		border_color = '#1a6eb5',
+		border_width = 3,
+		placeholder_text = '',
+		show = '*'
 			)
 	new_account_password_tb.place(x=365, y=232)
 
 	# New Account Password TB
 	new_account_confirm_password_tb = customtkinter.CTkEntry(
-	master = login_page,
-	width = 180,
-	height = 30,
-	fg_color = '#282828',
-	border_color = '#1a6eb5',
-	border_width = 3,
-	placeholder_text = '',
-	show = '*'
+		master = login_page,
+		width = 180,
+		height = 30,
+		fg_color = '#282828',
+		border_color = '#1a6eb5',
+		border_width = 3,
+		placeholder_text = '',
+		show = '*'
 			)
 	new_account_confirm_password_tb.place(x=365, y=282)
 
 	# TEXT ELEMENTS
 
-	# Bottom text: created
+	# Error Text
+	error_text_label = customtkinter.CTkLabel(
+		master = login_page,
+		text = '',
+		bg_color = dgrey,
+		font=('Segoe', 13, 'bold'),
+		text_color = 'red',
+		width = 320,
+		height = 20
+		)
+	error_text_label.place(x=160, y=395)
 
-	# Bottom text: git link
-
-	# Error text
+	# GitHub Button 
+	github_image = customtkinter.CTkImage(Image.open(current_path + '/gui/github_icon.png'), size=(32, 32))
+	github_button = customtkinter.CTkButton(
+		master = login_page,
+		command = open_github_page,
+		image = github_image,
+		text = '',
+		width = 32,
+		height = 32,
+		hover_color = bluehover,
+		corner_radius = 0,
+		border_width = 0,
+		border_spacing = 0,
+		fg_color = bluey
+		     )
+	github_button.place(x=592, y=435)
 
 	# Run
 	login_page.mainloop()
@@ -213,6 +239,9 @@ def run_app():
 
 	is_recording = False
 	frames = []
+	is_playing = False
+	stream = None
+	audio_thread = None
 
 	# App Frame
 	app = customtkinter.CTk()
@@ -453,7 +482,149 @@ def run_app():
 		set_wawla('Recordings')
 		switch_frame(only_recordings_frame)
 		update_wawla_text()
-		print("test: recordings")
+
+		recordings_list = []
+
+		recordings = current_user.get_recordings()
+		row = 0
+		buttons = []
+		newline = '\n'
+		for elem in recordings:
+
+			recording = customtkinter.CTkButton(
+				master = only_recordings_frame,
+				command = lambda x=elem[0]: recording_display(x),
+				image = recordings_image,
+				width = 250,
+				height = 50,
+				text = f"{elem[2]} {newline} {elem[5].strftime('%Y-%m-%d %H:%M')}",
+				anchor = 'w',
+				fg_color = '#1f1f1f',
+				bg_color = '#282828',
+				background_corner_colors = ['#282828','#282828','#282828','#282828'],
+				border_color = '#1a6eb5',
+				hover_color = '#323232',
+				border_width = 1,
+				)
+			recording.grid(row=row, column=0, padx=10, pady=(10, 10))
+			row += 1
+			buttons.append(recording)	
+
+	def recording_display(recording_id):
+		global is_playing, stream, audio_thread
+
+		recording = peko_database.get_recording(recording_id)
+
+		switch_screen(recording_display_screen)
+
+		recording_display_title_label.configure(text = recording[2])
+		recording_display_date_label.configure(text = recording[5].strftime('%Y-%m-%d %H:%M'))
+
+		is_playing = False
+		stream = None
+		audio_thread = None
+		wf = wave.open(recording[3], 'rb')
+		total_duration =  wf.getnframes() / wf.getframerate()
+
+		def play_audio(volume_slider, duration_label):
+		    global stream, is_playing
+
+		    # Open the wave file
+		    wf = wave.open(recording[3], 'rb')
+		    total_duration = wf.getnframes() / wf.getframerate()
+
+		    # Create a PyAudio object
+		    p = pyaudio.PyAudio()
+
+		    # Open a stream
+		    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+		                    channels=wf.getnchannels(),
+		                    rate=wf.getframerate(),
+		                    output=True)
+		    chunk_size = 1024
+		    data = wf.readframes(chunk_size)
+		    while data and is_playing:
+		    	remaining_duration = total_duration - (wf.tell() / wf.getframerate())
+		    	recording_display_duration_label.configure(text=f"{remaining_duration:.2f}")
+		    	samples = struct.unpack(f"{len(data)//wf.getsampwidth()}h", data)
+		    	volume = volume_slider.get()
+		    	samples = [int(sample * volume / 100) for sample in samples]
+		    	data = struct.pack(f"{len(samples)}h", *samples)
+		    	stream.write(data)
+		    	data = wf.readframes(chunk_size)
+
+		    # Cleanup
+		    stream.stop_stream()
+		    stream.close()
+		    p.terminate()
+		    wf.close()
+
+		    recording_display_play_button.configure(state = 'normal', fg_color = bluey)
+		    recording_display_stop_button.configure(state = 'disabled', fg_color = dgrey)
+		    duration_label.configure(text="0.00")
+
+		def on_play():
+		    global is_playing, audio_thread
+		    is_playing = False  # Reset is_playing to allow replaying
+		    if audio_thread and audio_thread.is_alive():
+		        # If there's an existing audio thread, wait for it to finish before starting a new one
+		        audio_thread.join()
+		    is_playing = True
+		    recording_display_play_button.configure(state = 'disabled', fg_color = dgrey)
+		    recording_display_stop_button.configure(state = 'normal', fg_color = bluey)
+		    audio_thread = threading.Thread(target=play_audio, args=(recording_display_volume_slider, recording_display_duration_label))
+		    audio_thread.start()
+
+		def on_stop():
+		    global is_playing
+		    is_playing = False
+		    recording_display_play_button.configure(state = 'normal', fg_color = bluey)
+		    recording_display_stop_button.configure(state = 'disabled', fg_color = dgrey)
+
+		play_image = customtkinter.CTkImage(Image.open(current_path + '/gui/play_icon.png'), size = (32,32))
+		recording_display_play_button = customtkinter.CTkButton(
+			master = recording_display_screen,
+			text = '',
+			image = play_image,
+			command = on_play,
+			width = 80,
+			height = 80,
+			fg_color = bluey,
+			hover_color = bluehover
+			)
+		recording_display_play_button.place(x=20, y=120)	
+
+		stop_image_bigger = customtkinter.CTkImage(Image.open(current_path + "/gui/stop_icon.png"), size=(32, 32))
+		recording_display_stop_button = customtkinter.CTkButton(
+			master = recording_display_screen,
+			text = '',
+			image = stop_image_bigger,
+			command = on_stop,
+			width = 80,
+			height = 80,
+			fg_color = bluey,
+			hover_color = bluehover
+			)
+		recording_display_stop_button.place(x=120, y=120)
+
+		recording_display_volume_slider = customtkinter.CTkSlider(
+			master = recording_display_screen,
+			from_ = 0,
+			to = 100,
+			number_of_steps = 101,
+			button_color = bluey,
+			button_hover_color = bluehover,
+			progress_color = 'white'
+			)
+		recording_display_volume_slider.place(x=220, y=170)
+
+		recording_display_duration_label = customtkinter.CTkLabel(
+			master = recording_display_screen,
+			text = f'{total_duration:.2f}',
+			font = ('Segoe', 15),
+			bg_color = lgrey
+			)
+		recording_display_duration_label.place(x=305, y=120)
 
 	def show_all_contacts():
 		# self-explanatory
@@ -573,6 +744,18 @@ def run_app():
 			tags.append('Other')
 		return tags
 
+	def recording_tags():
+		tags = []
+		if recording_tag_personal_button.cget('fg_color') == bluey:
+			tags.append('Personal')
+		if recording_tag_work_button.cget('fg_color') == bluey:
+			tags.append('School')
+		if recording_tag_school_button.cget('fg_color') == bluey:
+			tags.append('Work')
+		if recording_tag_other_button.cget('fg_color') == bluey:
+			tags.append('Other')
+		return tags
+
 	def new_note_submit():
 		title = new_note_title_tb.get().strip()
 		favorite = check_if_fav_button()
@@ -584,14 +767,13 @@ def run_app():
 		switch_screen(add_content_screen)
 
 	def check_if_fav_button():
-		if new_note_favorite_button.cget("image") == favorites_empty_image:
-			return False
-		return True
+		return new_note_favorite_button.cget("image") == favorites_empty_image
 
 	def check_if_fav_button2():
-		if new_whiteboard_favorite_button.cget("image") == favorites_empty_image:
-			return False
-		return True
+		return new_whiteboard_favorite_button.cget("image") == favorites_empty_image
+
+	def check_if_fav_button3():
+		return new_recording_favorite_button.cget("image") == favorites_empty_image
 
 	def new_note_fav():
 		if new_note_favorite_button.cget("image") == favorites_empty_image:
@@ -643,7 +825,7 @@ def run_app():
 		# add to database
 		title = whiteboard_title_tb.get().strip()
 		content = file_path
-		favorite = new_whiteboard_fav()
+		favorite = check_if_fav_button2()
 		tags = whiteboard_tags()
 		peko_database.insert_whiteboard(current_user.user_id, title, content, favorite, tags)
 
@@ -670,7 +852,7 @@ def run_app():
 		uid = current_user.user_id
 		title = new_reminder_title_tb.get().strip()
 		desc = new_reminder_content_tb.get('0.0', 'end').strip()
-		rem_date = str_dt
+		rem_date = cal.get_date()
 
 		peko_database.insert_reminder(uid, title, desc, rem_date)
 
@@ -740,6 +922,13 @@ def run_app():
 			wf.close()
 			frames = []
 
+			# add to database
+			title = new_recording_title_tb.get().strip()
+			content = filename
+			favorite = check_if_fav_button3()
+			tags = recording_tags()
+			peko_database.insert_recording(current_user.user_id, title, content, favorite, tags)
+
 		audio = pyaudio.PyAudio()
 
 	def start_recording():
@@ -772,6 +961,11 @@ def run_app():
 		stop_recording_button.configure(state = 'disabled', fg_color = dgrey)
 
 		is_recording = False
+
+	def play_recording(recording_id):
+		pass
+
+
 
 
 
@@ -1203,9 +1397,7 @@ def run_app():
 	border_width = 3,
 	)
 
-
 # =============================================
-
 
 	# Add Button
 	add_button = customtkinter.CTkButton(
@@ -2155,7 +2347,6 @@ def run_app():
 		justify = 'left'
 		)
 
-
 # ==================================== REMINDERS ==========================================
 
 	add_reminder_screen = customtkinter.CTkFrame(
@@ -2232,8 +2423,8 @@ def run_app():
 		borderwidth=2, year=2024, state='readonly')
 	cal.place(x=32,y=436)
 
-	dt = cal.get_date()
-	str_dt = dt.strftime("%Y-%m-%d")
+	#dt = cal.get_date()
+	#str_dt = dt.strftime("%Y-%m-%d")
 
 	new_reminder_cancel_button = customtkinter.CTkButton(
 		master = add_reminder_screen,
@@ -2294,10 +2485,6 @@ def run_app():
 		font = ('Segoe', 18, 'bold'),
 		text_color = 'white'
 	)
-
-	
-
-
 
 # ====================================== RECORDINGS =====================================
 
@@ -2478,18 +2665,29 @@ def run_app():
 		     )
 	new_recording_submit_button.place(x=365, y=580)
 
+# ========================== 	RECORDNIG DISPLAY ===================================
 
+	recording_display_screen = customtkinter.CTkFrame(
+		master = app,
+		width = 480,
+		height = 600,
+		bg_color = '#323232',
+		fg_color = '#323232'
+		)
 
+	recording_display_title_label = customtkinter.CTkLabel(
+		master = recording_display_screen,
+		text = 'title test',
+		font = ('Segoe', 24, 'bold')
+		)
+	recording_display_title_label.place(x=20, y=20)
 
-
-
-
-
-
-
-
-
-
+	recording_display_date_label = customtkinter.CTkLabel(
+		master = recording_display_screen,
+		text = 'date',
+		font = ('Segoe', 15)
+		)
+	recording_display_date_label.place(x=20, y=50)
 
 
 
@@ -2508,10 +2706,9 @@ def run_app():
 	# List of ShowScreens
 	screen_list = [add_content_screen, add_text_note_screen, text_note_display_screen, add_contact_screen,
 	contact_display_screen, add_whiteboard_screen, add_reminder_screen, whiteboard_display_screen, add_recording_screen,
-	reminder_display_screen]
+	reminder_display_screen, recording_display_screen]
 
 	#run app
 	app.mainloop()
 
 run_login_page()
-#run_app()
