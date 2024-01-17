@@ -22,4 +22,5 @@ class User:
 	def get_reminders(self):
 		return db.get_reminders(self.user_id)
 
-
+	def get_recordings(self):
+		return db.get_recordings(self.user_id)
