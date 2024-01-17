@@ -109,7 +109,7 @@ CREATE TABLE WhiteboardsTags (
 );
 
 -- Junction table for many-to-many relationship between Tags and Recordings
-CREATE TABLE RecoringsTags (
+CREATE TABLE RecordingsTags (
     id INTEGER REFERENCES Recordings(recording_id) ON DELETE CASCADE ON UPDATE CASCADE,
     tag_name VARCHAR(50) REFERENCES Tags(tag_name) ON UPDATE CASCADE ON DELETE RESTRICT,
     PRIMARY KEY (id, tag_name)
