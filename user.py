@@ -24,3 +24,14 @@ class User:
 
 	def get_recordings(self):
 		return db.get_recordings(self.user_id)
+
+	def get_all_notes(self):
+		return db.get_all_notes(self.user_id)
+
+	def get_all_favorites(self):
+		return db.get_all_favorites(self.user_id)
+
+	def get_all_tag(self, tag_name):
+		return db.get_all_tag(self.user_id, tag_name)
+
+
