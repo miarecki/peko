@@ -108,7 +108,7 @@ def run_login_page():
 		hover_color = '#317dbc',
 		background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 		bg_color = '#1f1f1f'
-		     )
+			 )
 	log_in_button.place(x=105, y=282)
 
 	# 'Create Account' Button 
@@ -123,7 +123,7 @@ def run_login_page():
 		hover_color = '#317dbc',
 		background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 		bg_color = '#1f1f1f'
-		     )
+			 )
 	create_account_button.place(x=375, y=332)
 
 	# TEXT BOXES // ENTRIES
@@ -219,7 +219,7 @@ def run_login_page():
 		border_width = 0,
 		border_spacing = 0,
 		fg_color = bluey
-		     )
+			 )
 	github_button.place(x=592, y=435)
 
 	# Run
@@ -259,11 +259,11 @@ def run_app():
 	app.iconbitmap(current_path + "/gui/icon.ico")
 
 	def set_wawla(value):
-	    global wawla
-	    wawla = value
+		global wawla
+		wawla = value
 
 	def update_wawla_text():
-	    wawla_text.configure(text=wawla)   
+		wawla_text.configure(text=wawla)   
 
 	# return to default color (it is so cheap and stupid, but it will work)
 	def lights_out(except_me):
@@ -295,7 +295,45 @@ def run_app():
 		set_wawla('All notes')
 		update_wawla_text()
 		switch_frame(all_notes_frame)
-		print(f"test: all notes")
+
+		all_notes = current_user.get_all_notes()
+
+		row = 0
+		buttons = []
+		newline = '\n'
+
+		for elem in all_notes:
+
+			note_image = None
+			note_display_command = None
+
+			if elem[0] == 'Notes':
+				note_image = text_image
+				note_display_command = lambda x=elem[1]: text_note_display(x)
+			elif elem[0] == 'WhiteboardNotes':
+				note_image = whiteboards_image
+				note_display_command = lambda x=elem[1]: whiteboard_display(x)
+			elif elem[0] == 'Recordings':
+				note_image = recordings_image
+				note_display_command = lambda x=elem[1]: recording_display(x)
+
+			note_button = customtkinter.CTkButton(
+				master= all_notes_frame,
+				command=note_display_command,
+				image=note_image,
+				width=250,
+				height=50,
+				text=f"{elem[3]} {newline} {elem[5].strftime('%Y-%m-%d %H:%M')}",
+				anchor='w',
+				fg_color='#1f1f1f',
+				bg_color='#282828',
+				background_corner_colors=['#282828', '#282828', '#282828', '#282828'],
+				border_color='#1a6eb5',
+				hover_color='#323232',
+				border_width=1,)
+			note_button.grid(row=row, column=0, padx=10, pady=(10, 10))
+			row += 1
+			buttons.append(note_button)
 
 	def show_all_reminders():
 		# self-explanatory
@@ -304,9 +342,6 @@ def run_app():
 		set_wawla('Reminders')
 		update_wawla_text()
 		switch_frame(reminders_frame)
-		print("test: reminders")
-
-		reminders_list = []
 
 		reminders = current_user.get_reminders() 
 		row = 1
@@ -353,7 +388,45 @@ def run_app():
 		update_wawla_text()
 		switch_frame(favorites_frame)
 		favorites_button.configure(fg_color="#1a6eb5", hover_color = '#317dbc')
-		print("test: favorites")
+
+		all_favorites = current_user.get_all_favorites()
+
+		row = 0
+		buttons = []
+		newline = '\n'
+
+		for elem in all_favorites:
+
+			note_image = None
+			note_display_command = None
+
+			if elem[0] == 'Notes':
+				note_image = text_image
+				note_display_command = lambda x=elem[1]: text_note_display(x)
+			elif elem[0] == 'WhiteboardNotes':
+				note_image = whiteboards_image
+				note_display_command = lambda x=elem[1]: whiteboard_display(x)
+			elif elem[0] == 'Recordings':
+				note_image = recordings_image
+				note_display_command = lambda x=elem[1]: recording_display(x)
+
+			note_button = customtkinter.CTkButton(
+				master= favorites_frame,
+				command=note_display_command,
+				image=note_image,
+				width=250,
+				height=50,
+				text=f"{elem[3]} {newline} {elem[5].strftime('%Y-%m-%d %H:%M')}",
+				anchor='w',
+				fg_color='#1f1f1f',
+				bg_color='#282828',
+				background_corner_colors=['#282828', '#282828', '#282828', '#282828'],
+				border_color='#1a6eb5',
+				hover_color='#323232',
+				border_width=1,)
+			note_button.grid(row=row, column=0, padx=10, pady=(10, 10))
+			row += 1
+			buttons.append(note_button)
 
 	def show_statistics():
 		# self-explanatory
@@ -362,7 +435,6 @@ def run_app():
 		set_wawla('Statistics')
 		switch_frame(statistics_frame)
 		update_wawla_text()
-		print("test: statistics")
 
 	def show_all_text():
 		# self-explanatory
@@ -371,9 +443,6 @@ def run_app():
 		set_wawla('Text notes')
 		switch_frame(only_text_notes_frame)
 		update_wawla_text()
-		print("test: text notes")
-
-		text_notes_list = []
 
 		# Just Text Note Buttons Creation on TEXT
 		text_notes = current_user.get_text_notes()
@@ -422,9 +491,6 @@ def run_app():
 		set_wawla('Whiteboards')
 		switch_frame(only_whiteboards_frame)
 		update_wawla_text()
-		print("test: whiteboards")
-
-		whiteboards_list = []
 
 		# Just Text Note Buttons Creation on TEXT
 		whiteboards = current_user.get_whiteboards()
@@ -483,8 +549,6 @@ def run_app():
 		switch_frame(only_recordings_frame)
 		update_wawla_text()
 
-		recordings_list = []
-
 		recordings = current_user.get_recordings()
 		row = 0
 		buttons = []
@@ -527,59 +591,59 @@ def run_app():
 		total_duration =  wf.getnframes() / wf.getframerate()
 
 		def play_audio(volume_slider, duration_label):
-		    global stream, is_playing
+			global stream, is_playing
 
-		    # Open the wave file
-		    wf = wave.open(recording[3], 'rb')
-		    total_duration = wf.getnframes() / wf.getframerate()
+			# Open the wave file
+			wf = wave.open(recording[3], 'rb')
+			total_duration = wf.getnframes() / wf.getframerate()
 
-		    # Create a PyAudio object
-		    p = pyaudio.PyAudio()
+			# Create a PyAudio object
+			p = pyaudio.PyAudio()
 
-		    # Open a stream
-		    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-		                    channels=wf.getnchannels(),
-		                    rate=wf.getframerate(),
-		                    output=True)
-		    chunk_size = 1024
-		    data = wf.readframes(chunk_size)
-		    while data and is_playing:
-		    	remaining_duration = total_duration - (wf.tell() / wf.getframerate())
-		    	recording_display_duration_label.configure(text=f"{remaining_duration:.2f}")
-		    	samples = struct.unpack(f"{len(data)//wf.getsampwidth()}h", data)
-		    	volume = volume_slider.get()
-		    	samples = [int(sample * volume / 100) for sample in samples]
-		    	data = struct.pack(f"{len(samples)}h", *samples)
-		    	stream.write(data)
-		    	data = wf.readframes(chunk_size)
+			# Open a stream
+			stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+							channels=wf.getnchannels(),
+							rate=wf.getframerate(),
+							output=True)
+			chunk_size = 1024
+			data = wf.readframes(chunk_size)
+			while data and is_playing:
+				remaining_duration = total_duration - (wf.tell() / wf.getframerate())
+				recording_display_duration_label.configure(text=f"{remaining_duration:.2f}")
+				samples = struct.unpack(f"{len(data)//wf.getsampwidth()}h", data)
+				volume = volume_slider.get()
+				samples = [int(sample * volume / 100) for sample in samples]
+				data = struct.pack(f"{len(samples)}h", *samples)
+				stream.write(data)
+				data = wf.readframes(chunk_size)
 
-		    # Cleanup
-		    stream.stop_stream()
-		    stream.close()
-		    p.terminate()
-		    wf.close()
+			# Cleanup
+			stream.stop_stream()
+			stream.close()
+			p.terminate()
+			wf.close()
 
-		    recording_display_play_button.configure(state = 'normal', fg_color = bluey)
-		    recording_display_stop_button.configure(state = 'disabled', fg_color = dgrey)
-		    duration_label.configure(text="0.00")
+			recording_display_play_button.configure(state = 'normal', fg_color = bluey)
+			recording_display_stop_button.configure(state = 'disabled', fg_color = dgrey)
+			duration_label.configure(text="0.00")
 
 		def on_play():
-		    global is_playing, audio_thread
-		    is_playing = False  # Reset is_playing to allow replaying
-		    if audio_thread and audio_thread.is_alive():
-		        # If there's an existing audio thread, wait for it to finish before starting a new one
-		        audio_thread.join()
-		    is_playing = True
-		    recording_display_play_button.configure(state = 'disabled', fg_color = dgrey)
-		    recording_display_stop_button.configure(state = 'normal', fg_color = bluey)
-		    audio_thread = threading.Thread(target=play_audio, args=(recording_display_volume_slider, recording_display_duration_label))
-		    audio_thread.start()
+			global is_playing, audio_thread
+			is_playing = False  # Reset is_playing to allow replaying
+			if audio_thread and audio_thread.is_alive():
+				# If there's an existing audio thread, wait for it to finish before starting a new one
+				audio_thread.join()
+			is_playing = True
+			recording_display_play_button.configure(state = 'disabled', fg_color = dgrey)
+			recording_display_stop_button.configure(state = 'normal', fg_color = bluey)
+			audio_thread = threading.Thread(target=play_audio, args=(recording_display_volume_slider, recording_display_duration_label))
+			audio_thread.start()
 
 		def on_stop():
-		    global is_playing
-		    is_playing = False
-		    recording_display_play_button.configure(state = 'normal', fg_color = bluey)
-		    recording_display_stop_button.configure(state = 'disabled', fg_color = dgrey)
+			global is_playing
+			is_playing = False
+			recording_display_play_button.configure(state = 'normal', fg_color = bluey)
+			recording_display_stop_button.configure(state = 'disabled', fg_color = dgrey)
 
 		play_image = customtkinter.CTkImage(Image.open(current_path + '/gui/play_icon.png'), size = (32,32))
 		recording_display_play_button = customtkinter.CTkButton(
@@ -633,8 +697,6 @@ def run_app():
 		set_wawla('Contacts')
 		switch_frame(contacts_frame)
 		update_wawla_text()
-
-		contacts_list = []
 
 		contacts = current_user.get_contacts()
 		row = 1
@@ -706,7 +768,6 @@ def run_app():
 
 	def show_add_content_screen():
 		switch_screen(add_content_screen)
-		print('test: add some note.')
 
 	def add_new_text_note():
 		switch_screen(add_text_note_screen)
@@ -725,9 +786,9 @@ def run_app():
 		if note_tag_personal_button.cget('fg_color') == bluey:
 			tags.append('Personal')
 		if note_tag_work_button.cget('fg_color') == bluey:
-			tags.append('School')
-		if note_tag_school_button.cget('fg_color') == bluey:
 			tags.append('Work')
+		if note_tag_school_button.cget('fg_color') == bluey:
+			tags.append('School')
 		if note_tag_other_button.cget('fg_color') == bluey:
 			tags.append('Other')
 		return tags
@@ -737,9 +798,9 @@ def run_app():
 		if whiteboard_tag_personal_button.cget('fg_color') == bluey:
 			tags.append('Personal')
 		if whiteboard_tag_work_button.cget('fg_color') == bluey:
-			tags.append('School')
-		if whiteboard_tag_school_button.cget('fg_color') == bluey:
 			tags.append('Work')
+		if whiteboard_tag_school_button.cget('fg_color') == bluey:
+			tags.append('School')
 		if whiteboard_tag_other_button.cget('fg_color') == bluey:
 			tags.append('Other')
 		return tags
@@ -749,9 +810,9 @@ def run_app():
 		if recording_tag_personal_button.cget('fg_color') == bluey:
 			tags.append('Personal')
 		if recording_tag_work_button.cget('fg_color') == bluey:
-			tags.append('School')
-		if recording_tag_school_button.cget('fg_color') == bluey:
 			tags.append('Work')
+		if recording_tag_school_button.cget('fg_color') == bluey:
+			tags.append('School')
 		if recording_tag_other_button.cget('fg_color') == bluey:
 			tags.append('Other')
 		return tags
@@ -767,13 +828,13 @@ def run_app():
 		switch_screen(add_content_screen)
 
 	def check_if_fav_button():
-		return new_note_favorite_button.cget("image") == favorites_empty_image
+		return new_note_favorite_button.cget("image") == favorites_filled_image
 
 	def check_if_fav_button2():
-		return new_whiteboard_favorite_button.cget("image") == favorites_empty_image
+		return new_whiteboard_favorite_button.cget("image") == favorites_filled_image
 
 	def check_if_fav_button3():
-		return new_recording_favorite_button.cget("image") == favorites_empty_image
+		return new_recording_favorite_button.cget("image") == favorites_filled_image
 
 	def new_note_fav():
 		if new_note_favorite_button.cget("image") == favorites_empty_image:
@@ -864,6 +925,45 @@ def run_app():
 		switch_frame(only_personal_frame)
 		update_wawla_text()
 
+		all_personal = current_user.get_all_tag(tag_name = 'Personal')
+
+		row = 0
+		buttons = []
+		newline = '\n'
+
+		for elem in all_personal:
+
+			note_image = None
+			note_display_command = None
+
+			if elem[0] == 'Notes':
+				note_image = text_image
+				note_display_command = lambda x=elem[1]: text_note_display(x)
+			elif elem[0] == 'WhiteboardNotes':
+				note_image = whiteboards_image
+				note_display_command = lambda x=elem[1]: whiteboard_display(x)
+			elif elem[0] == 'Recordings':
+				note_image = recordings_image
+				note_display_command = lambda x=elem[1]: recording_display(x)
+
+			note_button = customtkinter.CTkButton(
+				master= only_personal_frame,
+				command=note_display_command,
+				image=note_image,
+				width=250,
+				height=50,
+				text=f"{elem[3]} {newline} {elem[5].strftime('%Y-%m-%d %H:%M')}",
+				anchor='w',
+				fg_color='#1f1f1f',
+				bg_color='#282828',
+				background_corner_colors=['#282828', '#282828', '#282828', '#282828'],
+				border_color='#1a6eb5',
+				hover_color='#323232',
+				border_width=1,)
+			note_button.grid(row=row, column=0, padx=10, pady=(10, 10))
+			row += 1
+			buttons.append(note_button)
+
 	def show_all_work():
 		# self-explanatory
 		lights_out(work_button)
@@ -871,6 +971,45 @@ def run_app():
 		set_wawla('Work')
 		switch_frame(only_work_frame)
 		update_wawla_text()
+
+		all_work = current_user.get_all_tag(tag_name = 'Work')
+
+		row = 0
+		buttons = []
+		newline = '\n'
+
+		for elem in all_work:
+
+			note_image = None
+			note_display_command = None
+
+			if elem[0] == 'Notes':
+				note_image = text_image
+				note_display_command = lambda x=elem[1]: text_note_display(x)
+			elif elem[0] == 'WhiteboardNotes':
+				note_image = whiteboards_image
+				note_display_command = lambda x=elem[1]: whiteboard_display(x)
+			elif elem[0] == 'Recordings':
+				note_image = recordings_image
+				note_display_command = lambda x=elem[1]: recording_display(x)
+
+			note_button = customtkinter.CTkButton(
+				master= only_work_frame,
+				command=note_display_command,
+				image=note_image,
+				width=250,
+				height=50,
+				text=f"{elem[3]} {newline} {elem[5].strftime('%Y-%m-%d %H:%M')}",
+				anchor='w',
+				fg_color='#1f1f1f',
+				bg_color='#282828',
+				background_corner_colors=['#282828', '#282828', '#282828', '#282828'],
+				border_color='#1a6eb5',
+				hover_color='#323232',
+				border_width=1,)
+			note_button.grid(row=row, column=0, padx=10, pady=(10, 10))
+			row += 1
+			buttons.append(note_button)		
 
 	def show_all_school():
 		# self-explanatory
@@ -880,6 +1019,45 @@ def run_app():
 		switch_frame(only_school_frame)
 		update_wawla_text()
 
+		all_school = current_user.get_all_tag(tag_name = 'School')
+
+		row = 0
+		buttons = []
+		newline = '\n'
+
+		for elem in all_school:
+
+			note_image = None
+			note_display_command = None
+
+			if elem[0] == 'Notes':
+				note_image = text_image
+				note_display_command = lambda x=elem[1]: text_note_display(x)
+			elif elem[0] == 'WhiteboardNotes':
+				note_image = whiteboards_image
+				note_display_command = lambda x=elem[1]: whiteboard_display(x)
+			elif elem[0] == 'Recordings':
+				note_image = recordings_image
+				note_display_command = lambda x=elem[1]: recording_display(x)
+
+			note_button = customtkinter.CTkButton(
+				master= only_school_frame,
+				command=note_display_command,
+				image=note_image,
+				width=250,
+				height=50,
+				text=f"{elem[3]} {newline} {elem[5].strftime('%Y-%m-%d %H:%M')}",
+				anchor='w',
+				fg_color='#1f1f1f',
+				bg_color='#282828',
+				background_corner_colors=['#282828', '#282828', '#282828', '#282828'],
+				border_color='#1a6eb5',
+				hover_color='#323232',
+				border_width=1,)
+			note_button.grid(row=row, column=0, padx=10, pady=(10, 10))
+			row += 1
+			buttons.append(note_button)	
+
 	def show_all_other():
 		# self-explanatory
 		lights_out(other_button)
@@ -888,26 +1066,65 @@ def run_app():
 		switch_frame(only_other_frame)
 		update_wawla_text()
 
+		all_other = current_user.get_all_tag(tag_name = 'Other')
+
+		row = 0
+		buttons = []
+		newline = '\n'
+
+		for elem in all_other:
+
+			note_image = None
+			note_display_command = None
+
+			if elem[0] == 'Notes':
+				note_image = text_image
+				note_display_command = lambda x=elem[1]: text_note_display(x)
+			elif elem[0] == 'WhiteboardNotes':
+				note_image = whiteboards_image
+				note_display_command = lambda x=elem[1]: whiteboard_display(x)
+			elif elem[0] == 'Recordings':
+				note_image = recordings_image
+				note_display_command = lambda x=elem[1]: recording_display(x)
+
+			note_button = customtkinter.CTkButton(
+				master= only_other_frame,
+				command=note_display_command,
+				image=note_image,
+				width=250,
+				height=50,
+				text=f"{elem[3]} {newline} {elem[5].strftime('%Y-%m-%d %H:%M')}",
+				anchor='w',
+				fg_color='#1f1f1f',
+				bg_color='#282828',
+				background_corner_colors=['#282828', '#282828', '#282828', '#282828'],
+				border_color='#1a6eb5',
+				hover_color='#323232',
+				border_width=1,)
+			note_button.grid(row=row, column=0, padx=10, pady=(10, 10))
+			row += 1
+			buttons.append(note_button)	
+
 	def show_search():
 		pass
 
 	def note_tags_light_up(button):
-	    if button.cget('fg_color') == grey:
-	        button.configure(fg_color = bluey, hover_color = bluehover)
-	    else:
-	        button.configure(fg_color = grey, hover_color = '#474747')
+		if button.cget('fg_color') == grey:
+			button.configure(fg_color = bluey, hover_color = bluehover)
+		else:
+			button.configure(fg_color = grey, hover_color = '#474747')
 
 	def whiteboard_tags_light_up(button):
-	    if button.cget('fg_color') == grey:
-	        button.configure(fg_color = bluey, hover_color = bluehover)
-	    else:
-	        button.configure(fg_color = grey, hover_color = '#474747')
+		if button.cget('fg_color') == grey:
+			button.configure(fg_color = bluey, hover_color = bluehover)
+		else:
+			button.configure(fg_color = grey, hover_color = '#474747')
 
 	def recording_tags_light_up(button):
-	    if button.cget('fg_color') == grey:
-	        button.configure(fg_color = bluey, hover_color = bluehover)
-	    else:
-	        button.configure(fg_color = grey, hover_color = '#474747')	
+		if button.cget('fg_color') == grey:
+			button.configure(fg_color = bluey, hover_color = bluehover)
+		else:
+			button.configure(fg_color = grey, hover_color = '#474747')	
 
 	def new_recording_submit():
 		global frames, audio
@@ -962,13 +1179,6 @@ def run_app():
 
 		is_recording = False
 
-	def play_recording(recording_id):
-		pass
-
-
-
-
-
 	# Left Panel Image and Buttons - MAIN
 
 	# All Notes Button
@@ -987,7 +1197,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	all_notes_button.place(x=20, y=50)
 
 	# Reminders Button
@@ -1006,7 +1216,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	reminders_button.place(x=20, y=80)
 
 	# Favorites Button
@@ -1025,7 +1235,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	favorites_button.place(x=20, y=110)
 
 	# Contacts Button
@@ -1044,7 +1254,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	contacts_button.place(x=20, y=140)
 
 	# Statistics Button
@@ -1063,7 +1273,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	statistics_button.place(x=20, y=170)
 
 	# Text Button
@@ -1082,7 +1292,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	text_button.place(x=20, y=250)
 
 	# Whiteboards Button
@@ -1101,7 +1311,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	whiteboards_button.place(x=20, y=280)
 
 	# Recordings Button
@@ -1120,7 +1330,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	recordings_button.place(x=20, y=310)
 
 	# Personal Button
@@ -1139,7 +1349,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	personal_button.place(x=20, y=390)
 
 	# Work Button
@@ -1158,7 +1368,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	work_button.place(x=20, y=420)
 
 	# School Button
@@ -1177,7 +1387,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	school_button.place(x=20, y=450)
 
 	# Other Button
@@ -1196,7 +1406,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	other_button.place(x=20, y=480)
 
 	# Hisory Button
@@ -1215,7 +1425,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	history_button.place(x=20, y=560)
 
 	# Settings Button
@@ -1234,7 +1444,7 @@ def run_app():
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f',
 	font = font
-		     )
+			 )
 	settings_button.place(x=20, y=590)
 
 	# User Avatar Button
@@ -1248,7 +1458,7 @@ def run_app():
 	hover_color = '#1f1f1f',
 	background_corner_colors=['#1f1f1f', '#1f1f1f', '#1f1f1f', '#1f1f1f'],
 	bg_color = '#1f1f1f'
-		     )
+			 )
 	user_avatar_button.place(x=10, y=630) # 640
 
 	# ==========================================================================================================
@@ -1411,7 +1621,7 @@ def run_app():
 	hover_color = '#317dbc',
 	background_corner_colors=['#282828', '#282828', '#282828', '#282828'],
 	bg_color = '#282828'
-		     )
+			 )
 	add_button.place(x=490, y=10)
 
 	# Search Button
@@ -1430,7 +1640,7 @@ def run_app():
 	hover_color = '#474747',
 	background_corner_colors=['#282828', '#282828', '#282828', '#282828'],
 	bg_color = '#282828'
-		     )
+			 )
 	search_button.place(x=220, y=10)
 
 	# Text Elements - Left Panel
@@ -1548,7 +1758,7 @@ def run_app():
 	background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
 	bg_color = '#323232',
 	font = font
-		     )
+			 )
 	new_text_note_button.place(x=75, y=150)
 
 	# Create New Whiteboard Note Button
@@ -1567,7 +1777,7 @@ def run_app():
 	background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
 	bg_color = '#323232',
 	font = font
-		     )
+			 )
 	new_whiteboard_note_button.place(x=218, y=150)
 
 	# Create New Recording Note Button
@@ -1585,7 +1795,7 @@ def run_app():
 	background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
 	bg_color = '#323232',
 	font = font
-		     )
+			 )
 	new_recording_note_button.place(x=361, y=150)
 
 	# Text (text)
@@ -1692,7 +1902,7 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey,
 	font = font
-		     )
+			 )
 	note_tag_personal_button.place(x=24, y=520)
 
 	# Work Tag
@@ -1710,7 +1920,7 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey,
 	font = font
-		     )
+			 )
 	note_tag_work_button.place(x=139, y=520)
 
 	# School Tag
@@ -1728,7 +1938,7 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey,
 	font = font
-		     )
+			 )
 	note_tag_school_button.place(x=254, y=520)
 
 	# Other Tag
@@ -1746,7 +1956,7 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey,
 	font = font
-		     )
+			 )
 	note_tag_other_button.place(x=369, y=520)
 
 	new_note_cancel_button = customtkinter.CTkButton(
@@ -1760,7 +1970,7 @@ def run_app():
 	hover_color = '#317dbc',
 	background_corner_colors = ['#323232', '#323232', '#323232', '#323232'],
 	bg_color = '#323232'
-		     )
+			 )
 	new_note_cancel_button.place(x=250, y=580)
 
 	new_note_submit_button = customtkinter.CTkButton(
@@ -1774,7 +1984,7 @@ def run_app():
 	hover_color = '#317dbc',
 	background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
 	bg_color = '#323232'
-		     )
+			 )
 	new_note_submit_button.place(x=365, y=580)
 
 	text_note_display_screen = customtkinter.CTkFrame(
@@ -1861,7 +2071,7 @@ def run_app():
 	hover_color = '#474747',
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey
-		     )
+			 )
 	contact_avatar_button.place(x=20, y=143)
 
 	# Avatar (text)
@@ -1999,7 +2209,7 @@ def run_app():
 	hover_color = '#585858',
 	background_corner_colors = ['#323232', '#323232', '#323232', '#323232'],
 	bg_color = '#323232'
-		     )
+			 )
 	new_contact_cancel_button.place(x=245, y=330)
 
 	new_contact_submit_button = customtkinter.CTkButton(
@@ -2013,7 +2223,7 @@ def run_app():
 	hover_color = '#317dbc',
 	background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
 	bg_color = '#323232'
-		     )
+			 )
 	new_contact_submit_button.place(x=375, y=330)
 
 
@@ -2154,20 +2364,20 @@ def run_app():
 	line_width = 5
 
 	def start_drawing(event):
-	    global is_drawing, prev_x, prev_y
-	    is_drawing = True
-	    prev_x, prev_y = event.x, event.y
+		global is_drawing, prev_x, prev_y
+		is_drawing = True
+		prev_x, prev_y = event.x, event.y
 
 	def draw(event):
-	    global is_drawing, prev_x, prev_y
-	    if is_drawing:
-	        current_x, current_y = event.x, event.y
-	        canvas.create_line(prev_x, prev_y, current_x, current_y, fill=drawing_color, width=line_width, capstyle=tkinter.ROUND, smooth=True)
-	        prev_x, prev_y = current_x, current_y
+		global is_drawing, prev_x, prev_y
+		if is_drawing:
+			current_x, current_y = event.x, event.y
+			canvas.create_line(prev_x, prev_y, current_x, current_y, fill=drawing_color, width=line_width, capstyle=tkinter.ROUND, smooth=True)
+			prev_x, prev_y = current_x, current_y
 
 	def stop_drawing(event):
-	    global is_drawing
-	    is_drawing = False
+		global is_drawing
+		is_drawing = False
 
 	canvas = tkinter.Canvas(add_whiteboard_screen, bg="white")
 	canvas.place(x=4, y=90)
@@ -2188,7 +2398,7 @@ def run_app():
 		hover_color = '#317dbc',
 		background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
 		bg_color = '#323232'
-		     )
+			 )
 	save_whiteboard_button.place(x=365, y=600)
 
 	cancel_new_whiteboard_button = customtkinter.CTkButton(
@@ -2202,7 +2412,7 @@ def run_app():
 		hover_color = '#317dbc',
 		background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 		bg_color = lgrey
-		     )
+			 )
 	cancel_new_whiteboard_button.place(x=250, y=600)
 
 	def clear_canvas():
@@ -2219,7 +2429,7 @@ def run_app():
 	hover_color = '#317dbc',
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey
-	     )
+		 )
 	clear_canvas_button.place(x=20, y=600)
 
 	whiteboard_title_tb = customtkinter.CTkEntry(
@@ -2269,7 +2479,7 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey,
 	font = font
-		     )
+			 )
 	whiteboard_tag_personal_button.place(x=24, y=560)
 
 	# Work Tag
@@ -2287,7 +2497,7 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey,
 	font = font
-		     )
+			 )
 	whiteboard_tag_work_button.place(x=139, y=560)
 
 	# School Tag
@@ -2305,7 +2515,7 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey,
 	font = font
-		     )
+			 )
 	whiteboard_tag_school_button.place(x=254, y=560)
 
 	# Other Tag
@@ -2323,7 +2533,7 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey,
 	font = font
-		     )
+			 )
 	whiteboard_tag_other_button.place(x=369, y=560)
 
 	whiteboard_display_screen = customtkinter.CTkFrame(
@@ -2537,7 +2747,7 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey,
 	corner_radius = 20
-		     )
+			 )
 	recording_button.place(x=139, y=300)
 
 	# Stop Recording Button
@@ -2555,7 +2765,7 @@ def run_app():
 	bg_color = lgrey,
 	corner_radius = 20,
 	state = 'disabled'
-		     )
+			 )
 	stop_recording_button.place(x=250, y=300)
 
 	new_recording_tag_text = customtkinter.CTkLabel(
@@ -2580,7 +2790,7 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey,
 	font = font
-		     )
+			 )
 	recording_tag_personal_button.place(x=24, y=520)
 
 	# Work Tag
@@ -2598,7 +2808,7 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey,
 	font = font
-		     )
+			 )
 	recording_tag_work_button.place(x=139, y=520)
 
 	# School Tag
@@ -2616,7 +2826,7 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey,
 	font = font
-		     )
+			 )
 	recording_tag_school_button.place(x=254, y=520)
 
 	# Other Tag
@@ -2634,7 +2844,7 @@ def run_app():
 	background_corner_colors=[lgrey, lgrey, lgrey, lgrey],
 	bg_color = lgrey,
 	font = font
-		     )
+			 )
 	recording_tag_other_button.place(x=369, y=520)
 
 	new_recording_cancel_button = customtkinter.CTkButton(
@@ -2648,7 +2858,7 @@ def run_app():
 	hover_color = '#317dbc',
 	background_corner_colors = ['#323232', '#323232', '#323232', '#323232'],
 	bg_color = '#323232'
-		     )
+			 )
 	new_recording_cancel_button.place(x=250, y=580)
 
 	new_recording_submit_button = customtkinter.CTkButton(
@@ -2662,7 +2872,7 @@ def run_app():
 	hover_color = '#317dbc',
 	background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
 	bg_color = '#323232'
-		     )
+			 )
 	new_recording_submit_button.place(x=365, y=580)
 
 # ========================== 	RECORDNIG DISPLAY ===================================
@@ -2688,6 +2898,19 @@ def run_app():
 		font = ('Segoe', 15)
 		)
 	recording_display_date_label.place(x=20, y=50)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
