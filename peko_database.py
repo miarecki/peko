@@ -4,11 +4,11 @@ from argon2 import PasswordHasher
 # this needs to be secret - leave for now.
 def db_connect():
 	db_connect.conn = psycopg2.connect(
-		host = ':)',
-		database = ':)',
-		user = ':)',
-		password = ':)',
-		port = '5432',
+		host = '',
+		database = '',
+		user = '',
+		password = '',
+		port = '',
 		)
 # =========================================================
 
@@ -693,3 +693,227 @@ def get_recording(rid):
 		db_connect.conn.commit()
 		db_connect.conn.close()
 
+# ================================
+
+def get_all_notes(uid):
+
+	db_connect()
+	c = db_connect.conn.cursor() 
+
+	try:
+		c.execute("""
+            SELECT
+    'Notes' AS note_type,
+    note_id,
+    user_id,
+    title,
+    content,
+    creation_date,
+    last_edit,
+    favorite,
+    is_deleted
+FROM
+    Notes
+WHERE
+    user_id = %s AND is_deleted = false
+
+UNION ALL
+
+SELECT
+    'WhiteboardNotes' AS note_type,
+    whiteboard_note_id AS note_id,
+    user_id,
+    title,
+    content,
+    creation_date,
+    last_edit,
+    favorite,
+    is_deleted
+FROM
+    WhiteboardNotes
+WHERE
+    user_id = %s AND is_deleted = false
+
+UNION ALL
+
+SELECT
+    'Recordings' AS note_type,
+    recording_id AS note_id,
+    user_id,
+    title,
+    content,
+    creation_date,
+    NULL AS last_edit,
+    favorite,
+    is_deleted
+FROM
+    Recordings
+WHERE
+    user_id = %s AND is_deleted = false
+
+ORDER BY
+    creation_date DESC;
+        """, (uid, uid, uid))
+
+		result = c.fetchall()
+		return result
+
+	finally:
+
+		db_connect.conn.commit()
+		db_connect.conn.close()
+
+# =======================================		
+
+def get_all_favorites(uid):
+
+	db_connect()
+	c = db_connect.conn.cursor() 
+
+	try:
+		c.execute("""
+            SELECT
+    'Notes' AS note_type,
+    note_id,
+    user_id,
+    title,
+    content,
+    creation_date,
+    last_edit,
+    favorite,
+    is_deleted
+FROM
+    Notes
+WHERE
+    user_id = %s AND is_deleted = false AND favorite = true
+
+UNION ALL
+
+SELECT
+    'WhiteboardNotes' AS note_type,
+    whiteboard_note_id AS note_id,
+    user_id,
+    title,
+    content,
+    creation_date,
+    last_edit,
+    favorite,
+    is_deleted
+FROM
+    WhiteboardNotes
+WHERE
+    user_id = %s AND is_deleted = false AND favorite = true
+
+UNION ALL
+
+SELECT
+    'Recordings' AS note_type,
+    recording_id AS note_id,
+    user_id,
+    title,
+    content,
+    creation_date,
+    NULL AS last_edit,
+    favorite,
+    is_deleted
+FROM
+    Recordings
+WHERE
+    user_id = %s AND is_deleted = false AND favorite = true
+
+ORDER BY
+    creation_date DESC;
+        """, (uid, uid, uid))
+
+		result = c.fetchall()
+		return result
+
+	finally:
+
+		db_connect.conn.commit()
+		db_connect.conn.close()
+
+# ====================================
+
+def get_all_tag(uid, tag_name):
+
+	db_connect()
+	c = db_connect.conn.cursor() 
+
+	try:
+		c.execute("""
+            SELECT
+    'Notes' AS note_type,
+    n.note_id,
+    n.user_id,
+    n.title,
+    n.content,
+    n.creation_date,
+    n.last_edit,
+    n.favorite,
+    n.is_deleted
+FROM
+    Notes n
+JOIN
+    NotesTags nt ON n.note_id = nt.id
+JOIN
+    Tags t ON nt.tag_name = t.tag_name
+WHERE
+    t.tag_name = %s AND n.is_deleted = false AND n.user_id = %s
+
+UNION ALL
+
+SELECT
+    'WhiteboardNotes' AS note_type,
+    wn.whiteboard_note_id AS note_id,
+    wn.user_id,
+    wn.title,
+    wn.content,
+    wn.creation_date,
+    wn.last_edit,
+    wn.favorite,
+    wn.is_deleted
+FROM
+    WhiteboardNotes wn
+JOIN
+    WhiteboardsTags wt ON wn.whiteboard_note_id = wt.id
+JOIN
+    Tags t ON wt.tag_name = t.tag_name
+WHERE
+    t.tag_name = %s AND wn.is_deleted = false AND wn.user_id = %s
+
+UNION ALL
+
+SELECT
+    'Recordings' AS note_type,
+    r.recording_id AS note_id,
+    r.user_id,
+    r.title,
+    r.content,
+    r.creation_date,
+    NULL AS last_edit,
+    r.favorite,
+    r.is_deleted
+FROM
+    Recordings r
+JOIN
+    RecordingsTags rt ON r.recording_id = rt.id
+JOIN
+    Tags t ON rt.tag_name = t.tag_name
+WHERE
+    t.tag_name = %s AND r.is_deleted = false AND r.user_id = %s
+
+ORDER BY
+    creation_date DESC;
+
+        """, (tag_name, uid, tag_name, uid, tag_name, uid,))
+
+		result = c.fetchall()
+		return result
+
+	finally:
+
+		db_connect.conn.commit()
+		db_connect.conn.close()
+
+# ====================================
