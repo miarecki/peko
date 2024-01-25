@@ -137,9 +137,9 @@ SELECT
     U.user_id,
     -- General statistics
     COUNT(DISTINCT N.note_id) + COUNT(DISTINCT WN.whiteboard_note_id) + COUNT(DISTINCT R.recording_id) AS total_notes,
-    COUNT(DISTINCT N.note_id) AS unique_notes,
-    COUNT(DISTINCT WN.whiteboard_note_id) AS unique_whiteboards,
-    COUNT(DISTINCT R.recording_id) AS unique_recordings,
+    COUNT(DISTINCT N.note_id) AS nb_notes,
+    COUNT(DISTINCT WN.whiteboard_note_id) AS nb_whiteboards,
+    COUNT(DISTINCT R.recording_id) AS nb_recordings,
 
     -- Note statistics
     MIN(LENGTH(N.content)) AS min_note_length,

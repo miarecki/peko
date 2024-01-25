@@ -110,7 +110,7 @@ def get_text_notes(uid):
 		c.execute('''SELECT * FROM Notes
 			WHERE user_id = %s AND is_deleted = false
 			ORDER BY
-	creation_date DESC;
+	last_edit DESC;
 ''', (uid,))
 
 		result = c.fetchall()
@@ -361,7 +361,7 @@ def get_whiteboards(uid):
 		c.execute('''SELECT * FROM WhiteboardNotes
 			WHERE user_id = %s AND is_deleted = false
 			ORDER BY
-	creation_date DESC;
+	last_edit DESC;
 ''', (uid,))
 
 		result = c.fetchall()
@@ -419,7 +419,8 @@ def get_reminders(uid):
 
 	try:
 		c.execute('''SELECT * FROM Reminders
-			WHERE user_id = %s;
+			WHERE user_id = %s
+			ORDER BY remind_date DESC;
 ''', (uid,))
 
 		result = c.fetchall()
@@ -489,7 +490,7 @@ def get_recordings(uid):
 		c.execute('''SELECT * FROM Recordings
 			WHERE user_id = %s AND is_deleted = false
 			ORDER BY
-	creation_date DESC;
+	last_edit DESC;
 ''', (uid,))
 
 		result = c.fetchall()
@@ -731,7 +732,7 @@ WHERE
 	t.tag_name = %s AND r.is_deleted = false AND r.user_id = %s
 
 ORDER BY
-	creation_date DESC;
+	last_edit DESC;
 
 		""", (tag_name, uid, tag_name, uid, tag_name, uid,))
 
@@ -904,9 +905,8 @@ FROM
 	Recordings
 WHERE
 	user_id = %s AND is_deleted = true
-
 ORDER BY
-	creation_date DESC;
+	last_edit DESC;
 		""", (uid, uid, uid))
 
 		result = c.fetchall()
@@ -1408,7 +1408,7 @@ def search_results(uid, title, favorite, types, tags, last_edit_limit):
 		queries.append(rec_query)
 
 	full_query = " UNION ALL ".join(queries)
-	full_query += " ) ORDER BY creation_date DESC;"
+	full_query += " ) ORDER BY last_edit DESC;"
 	full_query = "SELECT DISTINCT * FROM(" + full_query
 
 	try:
@@ -1418,4 +1418,3 @@ def search_results(uid, title, favorite, types, tags, last_edit_limit):
 	finally:
 		db_connect.conn.commit()
 		db_connect.conn.close()
-

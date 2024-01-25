@@ -351,6 +351,15 @@ def run_app():
 
 		all_notes = current_user.get_all_notes()
 
+		if all_notes == []:
+			empty_label = customtkinter.CTkLabel(
+				master = all_notes_frame,
+				font = ('Segoe', 14, 'bold'),
+				text = 'No notes found.',
+				fg_color = grey
+				)
+			empty_label.grid(row=0, column=0, padx=90, pady=180)
+
 		row = 0
 		buttons = []
 		newline = '\n'
@@ -420,12 +429,12 @@ def run_app():
 			elif delta <= 7:  # A week or less
 				# Gradually turn red as the due date approaches
 				red = 255
-				green = round(255 * (delta / 7))
+				green = round(255 * (delta / 10))
 				return f"#{red:02x}{green:02x}00"
 			else:
 				return "#008000"  # Nice green
 
-		reminders = current_user.get_reminders() 
+		reminders = current_user.get_reminders() 	
 
 		row = 1
 		buttons = []
@@ -442,7 +451,7 @@ def run_app():
 				image = reminders_image,
 				width = 250,
 				height = 50,
-				text = f"{short(elem[2])} {newline} {due_date.strftime('%d-%m-%Y')}",
+				text = f"{short(elem[2])}{newline}{due_date.strftime('%d-%m-%Y')}",
 				font = font,
 				anchor = 'w',
 				fg_color = button_color,
@@ -466,8 +475,9 @@ def run_app():
 		reminder_display_due_date_label.configure(text = reminder[5].strftime('%d-%m-%Y'))
 
 		reminder_display_title_label.place(x=20,y=50)
-		reminder_display_description_label.place(x=20,y=80)
-		reminder_display_due_date_label.place(x=20,y=120)
+		reminder_display_description_label.place(x=20,y=90)
+		reminder_display_due_label.place(x=20,y=130)
+		reminder_display_due_date_label.place(x=70,y=130)
 
 		def delete_reminder_forever():
 			peko_database.delete_reminder(current_user.user_id, reminder_id)
@@ -489,7 +499,7 @@ def run_app():
 			background_corner_colors=['#323232', '#323232', '#323232', '#323232'],
 			bg_color = '#323232'
 		 )
-		reminder_delete_button.place(x=335, y=280)
+		reminder_delete_button.place(x=335, y=160)
 
 	def show_all_favorites():
 		# self-explanatory
@@ -501,6 +511,15 @@ def run_app():
 		favorites_button.configure(fg_color=user_button_color, hover_color = user_button_color_hover)
 
 		all_favorites = current_user.get_all_favorites()
+
+		if all_favorites == []:
+			empty_label = customtkinter.CTkLabel(
+				master = favorites_frame,
+				font = ('Segoe', 14, 'bold'),
+				text = 'No notes found.',
+				fg_color = grey
+				)
+			empty_label.grid(row=0, column=0, padx=90, pady=180)
 
 		row = 0
 		buttons = []
@@ -619,6 +638,15 @@ def run_app():
 		# Just Text Note Buttons Creation on TEXT
 		text_notes = current_user.get_text_notes()
 
+		if text_notes == []:
+			empty_label = customtkinter.CTkLabel(
+				master = only_text_notes_frame,
+				font = ('Segoe', 14, 'bold'),
+				text = 'No notes found.',
+				fg_color = grey
+				)
+			empty_label.grid(row=0, column=0, padx=90, pady=180)
+
 		row = 0
 		buttons = []
 		newline = '\n'
@@ -696,7 +724,7 @@ def run_app():
 		switch_screen(text_note_display_screen)
 		text_note_display_title_tb.delete(0, "end")
 		text_note_display_title_tb.insert(0, note[2])
-		text_note_display_content_tb.delete("0.0", "end")
+		text_note_display_content_tb.delete(0, "end")
 		text_note_display_content_tb.insert("0.0", note[3])
 		check_if_note_fav(note[6])
 		light_up_text_note_tags(tags)
@@ -763,6 +791,15 @@ def run_app():
 		update_wawla_text()
 
 		whiteboards = current_user.get_whiteboards()
+
+		if whiteboards == []:
+			empty_label = customtkinter.CTkLabel(
+				master = only_whiteboards_frame,
+				font = ('Segoe', 14, 'bold'),
+				text = 'No notes found.',
+				fg_color = grey
+				)
+			empty_label.grid(row=0, column=0, padx=90, pady=180)
 
 		row = 0
 		buttons = []
@@ -913,6 +950,15 @@ def run_app():
 		update_wawla_text()
 
 		recordings = current_user.get_recordings()
+
+		if recordings == []:
+			empty_label = customtkinter.CTkLabel(
+				master = only_recordings_frame,
+				font = ('Segoe', 14, 'bold'),
+				text = 'No notes found.',
+				fg_color = grey
+				)
+			empty_label.grid(row=0, column=0, padx=90, pady=180)
 
 		row = 0
 		buttons = []
@@ -1373,6 +1419,15 @@ def run_app():
 		switch_screen(add_content_screen)
 		show_all_notes()
 
+		new_note_title_tb.delete(0, "end")
+		new_note_content_tb.delete("0.0", "end")
+		new_note_favorite_button.configure(image = favorites_empty_image)
+		note_tag_personal_button.configure(fg_color = grey, hover_color = lgrey)
+		note_tag_work_button.configure(fg_color = grey, hover_color = lgrey)
+		note_tag_school_button.configure(fg_color = grey, hover_color = lgrey)
+		note_tag_other_button.configure(fg_color = grey, hover_color = lgrey)
+		
+
 	def check_if_fav_button():
 		return new_note_favorite_button.cget("image") == favorites_filled_image
 
@@ -1451,6 +1506,14 @@ def run_app():
 
 		peko_database.insert_contact(uid, display_name, first_name, last_name, email, phone, avatar)
 		avatar_file_path = ''
+
+		display_name_tb.delete(0, "end")
+		contact_avatar_button.configure(image = photo_image)
+		first_name_tb.delete(0, "end")
+		last_name_tb.delete(0, "end")
+		email_tb.delete(0, "end")
+		phone_tb.delete(0, "end")
+
 		switch_screen(add_content_screen)
 		show_all_contacts()
 
@@ -1468,6 +1531,9 @@ def run_app():
 		show_all_reminders()
 		switch_screen(add_content_screen)
 
+		new_reminder_title_tb.delete(0, "end")
+		new_reminder_content_tb.delete(0, "end")
+
 	def show_all_personal():
 		# self-explanatory
 		lights_out(personal_button)
@@ -1478,6 +1544,15 @@ def run_app():
 		update_wawla_text()
 
 		all_personal = current_user.get_all_tag(tag_name = 'Personal')
+
+		if all_personal == []:
+			empty_label = customtkinter.CTkLabel(
+				master = only_personal_frame,
+				font = ('Segoe', 14, 'bold'),
+				text = 'No notes found.',
+				fg_color = grey
+				)
+			empty_label.grid(row=0, column=0, padx=90, pady=180)
 
 		row = 0
 		buttons = []
@@ -1526,7 +1601,16 @@ def run_app():
 		forget_buttons(only_work_frame)
 		update_wawla_text()
 
-		all_work = current_user.get_all_tag(tag_name = 'Work')		
+		all_work = current_user.get_all_tag(tag_name = 'Work')	
+
+		if all_work == []:
+			empty_label = customtkinter.CTkLabel(
+				master = only_work_frame,
+				font = ('Segoe', 14, 'bold'),
+				text = 'No notes found.',
+				fg_color = grey
+				)
+			empty_label.grid(row=0, column=0, padx=90, pady=180)	
 
 		row = 0
 		buttons = []
@@ -1577,6 +1661,15 @@ def run_app():
 
 		all_school = current_user.get_all_tag(tag_name = 'School')
 
+		if all_school == []:
+			empty_label = customtkinter.CTkLabel(
+				master = only_school_frame,
+				font = ('Segoe', 14, 'bold'),
+				text = 'No notes found.',
+				fg_color = grey
+				)
+			empty_label.grid(row=0, column=0, padx=90, pady=180)
+
 		row = 0
 		buttons = []
 		newline = '\n'
@@ -1625,6 +1718,15 @@ def run_app():
 		update_wawla_text()
 
 		all_other = current_user.get_all_tag(tag_name = 'Other')
+
+		if all_other == []:
+			empty_label = customtkinter.CTkLabel(
+				master = only_other_frame,
+				font = ('Segoe', 14, 'bold'),
+				text = 'No notes found.',
+				fg_color = grey
+				)
+			empty_label.grid(row=0, column=0, padx=90, pady=180)
 	
 		row = 0
 		buttons = []
@@ -1924,14 +2026,14 @@ def run_app():
 			)
 		last_edited_search_menu.place(x=80, y=180)
 
-		or_later_search_label = customtkinter.CTkLabel(
+		or_older_search_label = customtkinter.CTkLabel(
 			master = search_window,
-			text = 'OR LATER',
+			text = 'OR OLDER',
 			bg_color = grey,
 			font=('Segoe', 10, 'bold'),
 			text_color = 'white'
 			)
-		or_later_search_label.place(x=230, y=180)
+		or_older_search_label.place(x=230, y=180)
 
 		def search_submit():
 
@@ -2074,6 +2176,7 @@ def run_app():
 		if display_name != '':
 			username_text.configure(text = display_name)
 			peko_database.update_display_name(current_user.user_id, display_name)
+		switch_screen(add_content_screen)
 
 	def show_all_trash():
 		# self-explanatory
@@ -2882,10 +2985,10 @@ def run_app():
 		)
 	add_content_screen.place(x=560, y=50)
 
-	# Create New Note... (text)
+	# Create a New Note... (text)
 	create_new_text = customtkinter.CTkLabel(
 	master = add_content_screen,
-	text = 'Create new note...',
+	text = 'Create a new note...',
 	bg_color = '#323232',
 	font=('Segoe', 32, 'bold'),
 	text_color = 'white'
@@ -4026,6 +4129,13 @@ def run_app():
 		master = reminder_display_screen,
 		text = '',
 		font = ('Segoe', 15),
+		text_color = 'white'
+	)
+
+	reminder_display_due_label = customtkinter.CTkLabel(
+		master = reminder_display_screen,
+		text = 'Due:',
+		font = ('Segoe', 18, 'bold'),
 		text_color = 'white'
 	)
 
