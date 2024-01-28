@@ -5,7 +5,7 @@ Python application featuring a password-protected encrypted note-taking system w
 
 ## Overview
 
-PEKO is a password-protected encrypted note-taking application built in Python using (mostly) customtkinter. It provides a secure environment for storing and managing text, images, and sound notes. The application utilizes PostgreSQL for efficient data storage. (to add later: incorporates for enhanced security.)
+PEKO is a password-protected encrypted note-taking application built in Python using (mostly) customtkinter. It provides a secure environment for storing and managing text, images, and sound notes. The application utilizes PostgreSQL for efficient data storage. (to add later: incorporates cryptography for enhanced security.)
 
 ## Features
 
