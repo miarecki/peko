@@ -1,11 +1,11 @@
-## Currently under construction.
+## Final project for Databases course at Universtity of Wrocław 23/24. Currently under construction for futher use in bachelor thesis.
 
 # PEKO - Personal Encrypted Keep Organizer
-Python application featuring a password-protected encrypted note-taking system with the ability to handle text, images, and sound, utilizing PostgreSQL for data storage and incorporating elliptic curve cryptography.
+Python application featuring a password-protected encrypted note-taking system with the ability to handle text, images, and sound, utilizing PostgreSQL for data storage and incorporating cryptography.
 
 ## Overview
 
-PEKO is a password-protected encrypted note-taking application built in Python using Tkinter. It provides a secure environment for storing and managing text, images, and sound notes. The application utilizes PostgreSQL for efficient data storage and incorporates elliptic curve cryptography for enhanced security.
+PEKO is a password-protected encrypted note-taking application built in Python using (mostly) customtkinter. It provides a secure environment for storing and managing text, images, and sound notes. The application utilizes PostgreSQL for efficient data storage. (to add later: incorporates for enhanced security.)
 
 ## Features
 
@@ -13,7 +13,8 @@ PEKO is a password-protected encrypted note-taking application built in Python u
 - **Encrypted Storage**: Notes are stored in an encrypted format for heightened privacy.
 - **Multi-Format Support**: PEKO supports text, image, and sound notes for versatile content creation.
 - **Database Integration**: Utilizes PostgreSQL for robust and organized data storage.
-- **Elliptic Curve Cryptography**: Implements elliptic curve cryptography.
+Later:
+- **Cryptography**
 
 ## Screenshots
 
@@ -43,8 +44,8 @@ PEKO is a password-protected encrypted note-taking application built in Python u
 ## 1. [CustomTkinter](https://github.com/TomSchimansky/CustomTkinter)
 A customized set of Tkinter widgets for enhanced GUI design.
 
-## 2. [Sublime Text](https://www.sublimetext.com/)
-A text editor for code editing and project management.
+## 2. [Sublime Text](https://www.sublimetext.com/) and [Visual Studio Code](https://code.visualstudio.com/)
+Text editors for code editing and project management.
 
 ## 3. [PostgreSQL](https://www.postgresql.org/)
 Utilized as the backend database for storing and managing notes.
