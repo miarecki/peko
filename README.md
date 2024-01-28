@@ -1,4 +1,4 @@
-## Final project for Databases course at Universtity of Wrocław 23/24. Currently under construction for futher use in bachelor thesis.
+## Final project for Databases course at Universtity of Wrocław 23/24. Currently under construction for futher use in bachelor's thesis.
 
 # PEKO - Personal Encrypted Keep Organizer
 Python application featuring a password-protected encrypted note-taking system with the ability to handle text, images, and sound, utilizing PostgreSQL for data storage and incorporating cryptography.
